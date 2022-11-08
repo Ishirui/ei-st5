@@ -13,7 +13,7 @@
 
 import zmq
 
-server_ip = "192.168.137.1"
+server_ip = "192.168.21.143"
 verbose_mode = False
 key_to_exit_program = b'q'
 

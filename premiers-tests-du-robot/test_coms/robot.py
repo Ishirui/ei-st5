@@ -15,7 +15,7 @@ import zmq
 import sys
 import time
 
-server_ip = "192.168.137.1"
+server_ip = "192.168.21.143"
 if len(sys.argv) > 1:
 	server_ip = sys.argv[1]
 my_id = 'bot001'
