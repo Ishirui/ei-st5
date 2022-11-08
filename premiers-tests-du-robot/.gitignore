@@ -1,0 +1,9 @@
+.hg*
+*.wav
+
+*.aux
+*.bbl
+*.blg
+*.dvi
+*.idx
+*.log
