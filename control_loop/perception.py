@@ -2,10 +2,22 @@ from __future__ import division
 
 import cv2
 import numpy as np
+import time
+from picamera import Picamera
+camera=Picamera()
+def test_camera():
+    global camera
+    camera.start_preview()
+    time.sleep(2)
+    my_file = open('test_photo.jpg', 'wb')
+    camera.capture(my_file)
+    # At this point my_file.flush() has been called, but the file has
+    # not yet been closed
+    my_file.close()
+    camera.stop_preview()
+image=cv2.imread("test_photo.jpg")
 
-image=cv2.imread("photo_carrefour1.jpg")
-
-def fonction(image):
+def perception(image):
 # Input Image
 
 
