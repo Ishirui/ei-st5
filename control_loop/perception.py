@@ -10,7 +10,8 @@ camera=PiCamera()
 def test_camera():
     global camera
     
-    
+    camera.resolution = (100, 100)
+    camera.framerate = 24
     # At this point my_file.flush() has been called, but the file has
     # not yet been closed
     output = np.empty((240, 320, 3), dtype=np.uint8)
@@ -28,7 +29,7 @@ def perception():
 
 
      
-    scale_percent = 30 # percent of original size
+    scale_percent = 100 # percent of original size
     width = int(image.shape[1] * scale_percent / 100)
     height = int(image.shape[0] * scale_percent / 100)
     dim = (width, height)
