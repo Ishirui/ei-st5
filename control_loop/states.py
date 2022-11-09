@@ -14,8 +14,11 @@ class BaseState:
         pass
 
     def transition(self, *args, **kwargs):
-        newState = self
-        return newState
+        new_state = self.transition_conditions(self, *args, **kwargs)
+        return new_state if new_state is not None else self
+
+    def transition_conditions(self, *args, **kwargs):
+        pass
 
 
 class SuivreLigne(BaseState):
@@ -28,7 +31,7 @@ class SuivreLigne(BaseState):
         consigne = (v,w)
         return consigne
 
-    def transition(self, *args, **kwargs):
+    def transition_conditions(self, *args, **kwargs):
         detect_obs = kwargs['detect_obs']
         detect_inter = kwargs['detect_inter']
         detect_out = kwargs['detect_out']
@@ -39,7 +42,6 @@ class SuivreLigne(BaseState):
             return Intersection()
         elif detect_out == 1:
             return SortieRoute()
-        return self
 
 class ArretUrgence(BaseState):
 
@@ -50,10 +52,9 @@ class ArretUrgence(BaseState):
         consigne = (0,0)
         return consigne
 
-    def transition(self, *args, **kwargs):
+    def transition_conditions(self, *args, **kwargs):
         if time.time() - self.start_time > 2:
             return DemiTour()
-        return self
 
 class DemiTour(BaseState):
 
@@ -64,10 +65,9 @@ class DemiTour(BaseState):
         consigne = (0,0.8)
         return consigne
 
-    def transition(self, *args, **kwargs):
+    def transition_conditions(self, *args, **kwargs):
         if time.time() - self.start_time > 4:
             return SuivreLigne()
-        return self
 
 
 
