@@ -22,8 +22,8 @@ image=cv2.imread("test_photo.jpg")
 def perception():
 # Input Image
 
-test_camera()
-image=cv2.imread("test_photo.jpg")
+    test_camera()
+    image=cv2.imread("test_photo.jpg")
 
     detectOut=0
     detect_inter=0
