@@ -2,16 +2,16 @@ import time
 
 
 class BaseState:
-    def __init__():
+    def __init__(self, **kwargs):
         pass
 
-    def entry(self):
+    def entry(self, **kwargs):
         pass
 
-    def during(self):
+    def during(self, **kwargs):
         pass
 
-    def exit(self):
+    def exit(self, **kwargs):
         pass
 
     def transition(self, *args, **kwargs):
@@ -49,8 +49,8 @@ class SuivreLigne(BaseState):
 class ArretUrgence(BaseState):
     stop_time = 2
 
-    def __init__(self):
-        start_time = time.time()
+    def __init__(self, **kwargs):
+        self.start_time = time.time()
     
     def during(self, **kwargs):
         consigne = (0,0)
@@ -65,8 +65,8 @@ class DemiTour(BaseState):
     turn_time = 4
     turn_w = 0.8
 
-    def __init__(self):
-        start_time = time.time()
+    def __init__(self, **kwargs):
+        self.start_time = time.time()
     
     def during(self, **kwargs):
         consigne = (0,self.turn_w)
@@ -78,50 +78,53 @@ class DemiTour(BaseState):
 
 
 class Intersection(BaseState):
+    center_time = 2 #################### A calibrer
 
-    def __init__(self):
-        start_time = time.time()
-    
-    def during(self, **kwargs):
-        consigne = (0,0)
-        return consigne
-
-    def transition_conditions(self, *args, **kwargs):
-        if time.time() - self.start_time > 2:
-            return ChoixDirection()
-        
-
-class ChoixDirection(BaseState):
-    turn_w = 2 ############################ Remplacer 2 par bonne constante
-
-    def entry(self, **kwargs):
-        instructions = kwargs['instructions']
-        direction = instructions.pop() ################## A voir si on garde pop
+    def __init__(self, **kwargs):
+        self.start_time = time.time()
 
     def during(self, **kwargs):
         v = kwargs['v']
+        consigne = (v,0)
+
+    def transition_conditions(self, *args, **kwargs):
+        if time.time() - self.start_time > self.center_time:
+            return ChoixDirection()
         
+class ChoixDirection(BaseState):
+    turn_w = 2 ############################ Remplacer 2 par bonne constante
+    turn_time = 2 ######################### A calibrer
+
+    def __init__(self, **kwargs):
+        self.start_time = time.time()
+
+    def entry(self, **kwargs):
+        instructions = kwargs['instructions']
+        self.direction = next(instructions) ################## A voir si on garde pop
+
+    def during(self, **kwargs):
+        v = kwargs['v']
+
         if self.direction == 'G':
-            consigne = (v,self.turn_w) 
+            consigne = (0,self.turn_w) 
         if self.direction == 'D':
-            consigne = (v,-self.turn_w) ################## Potentiellement, changer de signes
+            consigne = (0,-self.turn_w) ################## Potentiellement, changer de signes
         else:
-            consigne = (v,0)
+            consigne = (0,0)
         return consigne
 
     def transition_conditions(self, *args, **kwargs):
-        detect_inter = kwargs['detect_inter']
-        
-        if detect_inter == 0:
+        if time.time() - self.start_time > self.turn_time:
             return SuivreLigne()
+        
+        
 
 
 class SortieRoute(BaseState):
     try_rejoin_time = 1
 
-
-    def __init__(self):
-        start_time = time.time()
+    def __init__(self, **kwargs):
+        self.start_time = time.time()
     
     def during(self, **kwargs):
         consigne = (0,0)
@@ -140,9 +143,8 @@ class DemiTourSR(BaseState):
     turn_time_SR = 4
     turn_w_SR = 0.8
 
-
-    def __init__(self):
-        start_time = time.time()
+    def __init__(self, **kwargs):
+        self.start_time = time.time()
     
     def during(self, **kwargs):
         consigne = (0,self.turn_w_SR)
