@@ -69,8 +69,8 @@ class ArretUrgence(BaseState):
 
 
 class DemiTour(BaseState):
-    turn_time = 4
-    turn_w = 0.8
+    turn_time = 2
+    turn_w = 1.6
 
     def __init__(self, **kwargs):
         self.start_time = time.time()
@@ -85,7 +85,7 @@ class DemiTour(BaseState):
 
 
 class Intersection(BaseState):
-    center_time = 2 #################### A calibrer
+    center_time = 0.5 #################### A calibrer
 
     def __init__(self, **kwargs):
         self.start_time = time.time()
@@ -100,8 +100,8 @@ class Intersection(BaseState):
         
 
 class ChoixDirection(BaseState):
-    turn_w = 0.8
-    turn_time = 2
+    turn_w = 1.6
+    turn_time = 1
 
     def __init__(self, **kwargs):
         self.start_time = time.time()
@@ -127,7 +127,7 @@ class ChoixDirection(BaseState):
 
 
 class SortieRoute(BaseState):
-    try_rejoin_time = 1
+    try_rejoin_time = 2
 
     def __init__(self, **kwargs):
         self.start_time = time.time()
@@ -146,8 +146,8 @@ class SortieRoute(BaseState):
 
 
 class DemiTourSR(BaseState):
-    turn_time_SR = 4
-    turn_w_SR = 0.8
+    turn_time_SR = 2
+    turn_w_SR = 1.6
 
     def __init__(self, **kwargs):
         self.start_time = time.time()
