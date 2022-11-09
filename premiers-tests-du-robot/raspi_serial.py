@@ -39,7 +39,7 @@ step_length = 5
 def main():
     test_camera()
     connect_to_arduino()
-    
+
     print("Welcome to raspi_serial.py")
     print("Press enter to validate your commands")
     print("Enter h to get the list of valid commands")
@@ -47,7 +47,7 @@ def main():
     while cmd_str != 'q':
         cmd_str = input("Enter your command: ")
         process_cmd(cmd_str)
-    
+
     camera.close()
 
 
@@ -87,7 +87,7 @@ def connect_to_arduino():
 
     time.sleep(2)
     c = 1
-    while (c!=b''):
+    while (c != b''):
         c = serial_file.read(1)
 
 
@@ -95,24 +95,24 @@ def process_cmd(cmd):
     global motor_speed
     global step_length
     cmd_type = {
-      "[q]uit": (cmd == 'q'),
-      "[h]elp": (cmd == 'h'),
-      "[e]ncoder values": (cmd == 'e'),
-      "[z]ero setting encoders": (cmd == 'z'),
-      "(%) set motor speed percentage": (cmd.isdigit()),
-      "[f]orward step": (cmd == 'f'),
-      "[l] left step": (cmd == 'l'),
-      "[r] right step": (cmd == 'r'),
-      "[b]ackward step": (cmd == 'b'),
-      "[lb] left step back": (cmd == 'lb'),
-      "[rb] right step back": (cmd == 'rb'),
-      "[ff]orward": (cmd == 'ff'),
-      "[bb]ackward": (cmd == 'bb'),
-      "[tl] turn left": (cmd == 'tl'),
-      "[tr] turn right": (cmd == 'tr'),
-      "[p]ause motors": (cmd == 'p'),
-      "[s]ervo move": (cmd == 's'),
-               }
+        "[q]uit": (cmd == 'q'),
+        "[h]elp": (cmd == 'h'),
+        "[e]ncoder values": (cmd == 'e'),
+        "[z]ero setting encoders": (cmd == 'z'),
+        "(%) set motor speed percentage": (cmd.isdigit()),
+        "[f]orward step": (cmd == 'f'),
+        "[l] left step": (cmd == 'l'),
+        "[r] right step": (cmd == 'r'),
+        "[b]ackward step": (cmd == 'b'),
+        "[lb] left step back": (cmd == 'lb'),
+        "[rb] right step back": (cmd == 'rb'),
+        "[ff]orward": (cmd == 'ff'),
+        "[bb]ackward": (cmd == 'bb'),
+        "[tl] turn left": (cmd == 'tl'),
+        "[tr] turn right": (cmd == 'tr'),
+        "[p]ause motors": (cmd == 'p'),
+        "[s]ervo move": (cmd == 's'),
+    }
 
     if cmd_type["[q]uit"]:
         print("Goodbye...")
@@ -133,74 +133,74 @@ def process_cmd(cmd):
     elif cmd_type["[f]orward step"]:
         print("Moving forward at " + str(motor_speed) + "%...")
         write_order(serial_file, Order.MOTOR)
-        write_i8(serial_file, motor_speed) #valeur moteur droit
-        write_i8(serial_file, motor_speed) #valeur moteur gauche
+        write_i8(serial_file, motor_speed)  # valeur moteur droit
+        write_i8(serial_file, motor_speed)  # valeur moteur gauche
         time.sleep(step_length)
         print('stop motors')
         write_order(serial_file, Order.STOP)
     elif cmd_type["[l] left step"]:
         print("Forward left at " + str(motor_speed) + "%...")
         write_order(serial_file, Order.MOTOR)
-        write_i8(serial_file, 0) #valeur moteur droit
-        write_i8(serial_file, motor_speed) #valeur moteur gauche
+        write_i8(serial_file, 0)  # valeur moteur droit
+        write_i8(serial_file, motor_speed)  # valeur moteur gauche
         time.sleep(step_length)
         print('stop motors')
         write_order(serial_file, Order.STOP)
     elif cmd_type["[r] right step"]:
         print("Forward right at " + str(motor_speed) + "%...")
         write_order(serial_file, Order.MOTOR)
-        write_i8(serial_file, motor_speed) #valeur moteur droit
-        write_i8(serial_file, 0) #valeur moteur gauche
+        write_i8(serial_file, motor_speed)  # valeur moteur droit
+        write_i8(serial_file, 0)  # valeur moteur gauche
         time.sleep(step_length)
         print('stop motors')
         write_order(serial_file, Order.STOP)
     elif cmd_type["[b]ackward step"]:
         print("Moving backward at " + str(motor_speed) + "%...")
         write_order(serial_file, Order.MOTOR)
-        write_i8(serial_file, -motor_speed) #valeur moteur droit
-        write_i8(serial_file, -motor_speed) #valeur moteur gauche
+        write_i8(serial_file, -motor_speed)  # valeur moteur droit
+        write_i8(serial_file, -motor_speed)  # valeur moteur gauche
         time.sleep(step_length)
         print('stop motors')
         write_order(serial_file, Order.STOP)
     elif cmd_type["[lb] left step back"]:
         print("Backward left at " + str(motor_speed) + "%...")
         write_order(serial_file, Order.MOTOR)
-        write_i8(serial_file, 0) #valeur moteur droit
-        write_i8(serial_file, -motor_speed) #valeur moteur gauche
+        write_i8(serial_file, 0)  # valeur moteur droit
+        write_i8(serial_file, -motor_speed)  # valeur moteur gauche
         time.sleep(step_length)
         print('stop motors')
         write_order(serial_file, Order.STOP)
     elif cmd_type["[rb] right step back"]:
         print("Backward right at " + str(motor_speed) + "%...")
         write_order(serial_file, Order.MOTOR)
-        write_i8(serial_file, -motor_speed) #valeur moteur droit
-        write_i8(serial_file, 0) #valeur moteur gauche
+        write_i8(serial_file, -motor_speed)  # valeur moteur droit
+        write_i8(serial_file, 0)  # valeur moteur gauche
         time.sleep(step_length)
         print('stop motors')
         write_order(serial_file, Order.STOP)
     elif cmd_type["[ff]orward"]:
         print("Moving forward at " + str(motor_speed) + "%...")
         write_order(serial_file, Order.MOTOR)
-        write_i8(serial_file, motor_speed) #valeur moteur droit
-        write_i8(serial_file, motor_speed) #valeur moteur gauche
+        write_i8(serial_file, motor_speed)  # valeur moteur droit
+        write_i8(serial_file, motor_speed)  # valeur moteur gauche
     elif cmd_type["[bb]ackward"]:
         print("Moving backward at " + str(motor_speed) + "%...")
         write_order(serial_file, Order.MOTOR)
-        write_i8(serial_file, -motor_speed) #valeur moteur droit
-        write_i8(serial_file, -motor_speed) #valeur moteur gauche
+        write_i8(serial_file, -motor_speed)  # valeur moteur droit
+        write_i8(serial_file, -motor_speed)  # valeur moteur gauche
     elif cmd_type["[tl] turn left"]:
         print("Turn left at " + str(motor_speed) + "%...")
         write_order(serial_file, Order.MOTOR)
-        write_i8(serial_file, motor_speed) #valeur moteur droit
-        write_i8(serial_file, -motor_speed) #valeur moteur gauche
+        write_i8(serial_file, motor_speed)  # valeur moteur droit
+        write_i8(serial_file, -motor_speed)  # valeur moteur gauche
         time.sleep(step_length)
         print('stop motors')
         write_order(serial_file, Order.STOP)
     elif cmd_type["[tr] turn right"]:
         print("Turn right at " + str(motor_speed) + "%...")
         write_order(serial_file, Order.MOTOR)
-        write_i8(serial_file, -motor_speed) #valeur moteur droit
-        write_i8(serial_file, motor_speed) #valeur moteur gauche
+        write_i8(serial_file, -motor_speed)  # valeur moteur droit
+        write_i8(serial_file, motor_speed)  # valeur moteur gauche
         time.sleep(step_length)
         print('stop motors')
         write_order(serial_file, Order.STOP)
@@ -210,10 +210,10 @@ def process_cmd(cmd):
     elif cmd_type["[s]ervo move"]:
         print("Moving front servo...")
         write_order(serial_file, Order.SERVO)
-        write_i16(serial_file, 45) #valeur angle servo
+        write_i16(serial_file, 45)  # valeur angle servo
         time.sleep(2)
         write_order(serial_file, Order.SERVO)
-        write_i16(serial_file, 90) #valeur angle servo
+        write_i16(serial_file, 90)  # valeur angle servo
     else:
         print("Invalid command")
 
@@ -221,28 +221,28 @@ def process_cmd(cmd):
 def lectureCodeurGauche():
     write_order(serial_file, Order.READENCODERl)
     while True:
-       try:
-           g = read_i16(serial_file)
-           break
-       except struct.error:
-           pass
-       except TimeoutError:
-           write_order(serial_file, Order.READENCODERl)
-           pass
+        try:
+            g = read_i16(serial_file)
+            break
+        except struct.error:
+            pass
+        except TimeoutError:
+            write_order(serial_file, Order.READENCODERl)
+            pass
     return g
 
 
 def lectureCodeurDroit():
     write_order(serial_file, Order.READENCODERr)
     while True:
-       try:
-           d = read_i16(serial_file)
-           break
-       except struct.error:
-           pass
-       except TimeoutError:
-           write_order(serial_file, Order.READENCODERr)
-           pass
+        try:
+            d = read_i16(serial_file)
+            break
+        except struct.error:
+            pass
+        except TimeoutError:
+            write_order(serial_file, Order.READENCODERr)
+            pass
     return d
 
 
