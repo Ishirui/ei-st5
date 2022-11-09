@@ -15,6 +15,8 @@ def test_camera():
     # not yet been closed
     my_file.close()
     camera.stop_preview()
+#PRENDRE PHOTO
+test_camera()
 image=cv2.imread("test_photo.jpg")
 
 def perception(image):
