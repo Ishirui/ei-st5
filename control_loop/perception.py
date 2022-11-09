@@ -2,14 +2,14 @@ from __future__ import division
 import cv2
 import numpy as np
 import time
-from picamera import Picamera
 
-camera=Picamera()
+from picamera import PiCamera
+
+camera=PiCamera()
 
 def test_camera():
     global camera
     camera.start_preview()
-    time.sleep(2)
     my_file = open('test_photo.jpg', 'wb')
     camera.capture(my_file)
     # At this point my_file.flush() has been called, but the file has
@@ -25,8 +25,13 @@ def perception():
     test_camera()
     image=cv2.imread("test_photo.jpg")
 
-    test_camera()
-    image=cv2.imread("test_photo.jpg")
+     
+    scale_percent = 30 # percent of original size
+    width = int(image.shape[1] * scale_percent / 100)
+    height = int(image.shape[0] * scale_percent / 100)
+    dim = (width, height)
+    image = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
+    image = cv2.flip(image, -1)
 
     detectOut=0
     detect_inter=0
@@ -40,7 +45,7 @@ def perception():
     hsv = cv2.cvtColor(thresh1, cv2.COLOR_RGB2HSV)
 
     # Define range of white color in HSV
-    lower_white = np.array([0, 0, 168])
+    lower_white = np.array([0, 0, 160])
     upper_white = np.array([172, 111, 255])
     # Threshold the HSV image
     mask = cv2.inRange(hsv, lower_white, upper_white)
@@ -54,7 +59,7 @@ def perception():
 
     # Find the different contours
     #contours,hierarchy= cv2.findContours(dilated_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    contours, hierarchy = cv2.findContours(dilated_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    im2,contours, hierarchy = cv2.findContours(dilated_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     img_contours = np.zeros(dilated_mask.shape)
     cv2.drawContours(img_contours, contours, -1, (255,0,0), 3)
     # Sort by area (keep only the biggest one)
@@ -101,3 +106,5 @@ def perception():
 
     erreur_orientation = image.shape[0]/2-cx
     return (erreur_orientation,detect_inter,detectOut)
+
+
