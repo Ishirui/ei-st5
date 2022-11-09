@@ -22,13 +22,13 @@ class BaseState:
 
 
 class SuivreLigne(BaseState):
-    line_correction_gain = 0.5 ######################### Remplacer 0.5 par le bon gain
+    line_correction_gain = 10 ######################### Remplacer par le bon gain
     
     def during(self, **kwargs):
         v = kwargs['v']
         erreur_orientation = kwargs['erreur_orientation']
 
-        w = self.line_correction_gain * erreur_orientation
+        w = self.line_correction_gain * erreur_orientation/320
         consigne = (v,w)
         return consigne
 

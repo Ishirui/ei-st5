@@ -4,34 +4,23 @@ import numpy as np
 import time
 
 from picamera import PiCamera
+from picamera.array import PiRGBArray
 
-camera=PiCamera()
+camera = PiCamera()
+camera.resolution = (640//4, 480//4)
+camera.framerate = 32
+rawCapture = PiRGBArray(camera, size=camera.resolution)
 
-def test_camera():
-    global camera
-    camera.resolution= (100,(240/360)*100)
-    camera.framerate = 24
-    output = np.empty((240, 320, 3), dtype=np.uint8)
-    camera.capture(output, 'rgb')
-    output = output.reshape((112, 128, 3))
-    output = output[:100, :100, :]
-    return output
 
-#PRENDRE PHOTO
+frame_source = camera.capture_continuous(rawCapture, format="bgr", use_video_port=True)
 
 def perception():
 # Input Image
 
-    image=test_camera()
-
-
-     
-    scale_percent = 100 # percent of original size
-    width = int(image.shape[1] * scale_percent / 100)
-    height = int(image.shape[0] * scale_percent / 100)
-    dim = (width, height)
-    image = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
+    image=next(frame_source).array
     image = cv2.flip(image, -1)
+
+    cv2.imshow("Image non traitée",image)
 
     detectOut=0
     detect_inter=0
@@ -99,10 +88,16 @@ def perception():
         detect_inter=1
         #prend une photo de l'intersection
 
-
+    cv2.imshow("Image traitée",dilated_mask)
+    
+    key = cv2.waitKey(1) & 0xFF
+    # clear the stream in preparation for the next frame
+    rawCapture.truncate(0)
 
 
    
     return (erreur_orientation,detect_inter,detectOut)
 
-
+if __name__ == "__main__":
+    while True:
+        perception()

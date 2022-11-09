@@ -50,6 +50,7 @@ def main():
             consigne = (0,0)
 
         transmit(*consigne)
+        print(consigne,curr_state)
 
 if __name__ == "__main__":
     try:

@@ -1,8 +1,8 @@
 # INITIALISATION DES FONCTIONS A IMPORTER UTILES
 
-from robust_serial import write_order, Order, write_i8, write_i16, read_i16
+from .robust_serial import write_order, Order, write_i8, write_i16, read_i16
 
-from utils import open_serial_port
+from .utils import open_serial_port
 import time
 serial_file = open_serial_port(baudrate=115200)
 
@@ -17,7 +17,7 @@ def connect_to_arduino():
     global serial_file
     try:
         # Open serial port (for communication with Arduino)
-        serial_file = open_serial_port(baudrate=11520)
+        serial_file = open_serial_port(baudrate=115200)
     except Exception as e:
         print('exception')
         raise e
@@ -40,6 +40,7 @@ def connect_to_arduino():
     c = 1
     while (c!=b''):
         c = serial_file.read(1)
+
 connect_to_arduino()
 
 def transmit(v,w):

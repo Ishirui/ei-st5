@@ -29,8 +29,8 @@ def envoi_commande(v, w):
     v_gauche = v - w
 
     # il faut remettre la valeur de la vitesse entre 0 et 100
-    write_i8(serial_file, v_droite/v_max * 100)  # moteur droit
-    write_i8(serial_file, v_gauche/v_max * 100)  # moteur gauche
+    write_i8(serial_file, int(v_droite/v_max * 100))  # moteur droit
+    write_i8(serial_file, int(v_gauche/v_max * 100))  # moteur gauche
 
 
 def utilisation_capteurs():
@@ -58,6 +58,7 @@ def connect_to_arduino():
         byte = bytes_array[0]
         if byte in [Order.HELLO.value, Order.ALREADY_CONNECTED.value]:
             is_connected = True
+            print("Suis là")
 
     time.sleep(2)
     c = 1
