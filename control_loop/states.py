@@ -93,6 +93,7 @@ class Intersection(BaseState):
     def during(self, **kwargs):
         v = kwargs['v']
         consigne = (v,0)
+        return consigne
 
     def transition_conditions(self, *args, **kwargs):
         if time.time() - self.start_time > self.center_time:
@@ -111,7 +112,6 @@ class ChoixDirection(BaseState):
         self.direction = next(instructions)
 
     def during(self, **kwargs):
-        v = kwargs['v']
 
         if self.direction == 'G':
             consigne = (0,self.turn_w) 
