@@ -117,6 +117,12 @@ void update_motors_orders()
   {
        digitalWrite(DIRECTION_RIGHT, LOW);
   }
+
+  if (MeasureDistance()<100){
+    motor_speed_left = 0;
+    motor_speed_right = 0;
+  }
+
   analogWrite(SPEED_LEFT, convert_to_pwm(float(motor_speed_left)));
   analogWrite(SPEED_RIGHT, convert_to_pwm(float(motor_speed_right)));
 }
