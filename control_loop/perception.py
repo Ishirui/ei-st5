@@ -1,10 +1,11 @@
 from __future__ import division
-
 import cv2
 import numpy as np
 import time
 from picamera import Picamera
+
 camera=Picamera()
+
 def test_camera():
     global camera
     camera.start_preview()
@@ -15,9 +16,8 @@ def test_camera():
     # not yet been closed
     my_file.close()
     camera.stop_preview()
+
 #PRENDRE PHOTO
-test_camera()
-image=cv2.imread("test_photo.jpg")
 
 def perception():
 # Input Image
@@ -25,13 +25,12 @@ def perception():
     test_camera()
     image=cv2.imread("test_photo.jpg")
 
+    test_camera()
+    image=cv2.imread("test_photo.jpg")
+
     detectOut=0
     detect_inter=0
     erreur_orientation=0
-
-    
-    h, w = image.shape[:2]
-    #print (w,h)
 
     # Convert to HSV color space
 
@@ -53,7 +52,6 @@ def perception():
     kernel_dilate = np.ones((4,4), np.uint8)
     dilated_mask = cv2.dilate(eroded_mask, kernel_dilate, iterations=1)
 
-
     # Find the different contours
     #contours,hierarchy= cv2.findContours(dilated_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     contours, hierarchy = cv2.findContours(dilated_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -66,8 +64,6 @@ def perception():
     contours = sorted(contours, key=cv2.contourArea, reverse=True)[:1]
 
 
-
-
     if len(contours) > 0:
         M = cv2.moments(contours[0])
         # Centroid
@@ -77,7 +73,6 @@ def perception():
         erreur = image.shape[0]/2-cx
     else:
         detectOut=1
-
 
 
     #edge detection
