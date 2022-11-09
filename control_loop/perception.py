@@ -106,5 +106,3 @@ def perception():
 
     erreur_orientation = image.shape[0]/2-cx
     return (erreur_orientation,detect_inter,detectOut)
-
-print(fonction(image))
