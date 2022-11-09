@@ -1,8 +1,7 @@
 # INITIALISATION DES FONCTIONS A IMPORTER UTILES
 
 
-# from stateflow import fct_de_robin_et_pl  # //A MODIFIER\\
-
+import time
 from robust_serial import write_order, Order, write_i8, write_i16, read_i16
 
 from utils import open_serial_port
@@ -18,7 +17,6 @@ r = 1
 
 
 def envoi_commande(v, w):
-    # appel fonction stateflow  # //A MODIFIER\\
 
     # on va dire au moteurs qu'on les modifie
     write_order(serial_file, Order.MOTOR)
@@ -33,3 +31,31 @@ def envoi_commande(v, w):
 
 def utilisation_capteurs():
     read_i16(serial_file)  # on lit ce que l'arduino envoie
+
+
+def connect_to_arduino():
+    global serial_file
+    try:
+        # Open serial port (for communication with Arduino)
+        serial_file = open_serial_port(baudrate=115200)
+    except Exception as e:
+        print('exception')
+        raise e
+
+    is_connected = False
+    # Initialize communication with Arduino
+    while not is_connected:
+        print("Trying connection to Arduino...")
+        write_order(serial_file, Order.HELLO)
+        bytes_array = bytearray(serial_file.read(1))
+        if not bytes_array:
+            time.sleep(2)
+            continue
+        byte = bytes_array[0]
+        if byte in [Order.HELLO.value, Order.ALREADY_CONNECTED.value]:
+            is_connected = True
+
+    time.sleep(2)
+    c = 1
+    while (c != b''):
+        c = serial_file.read(1)
