@@ -1,6 +1,5 @@
 import time
 
-
 class BaseState:
     def __init__(self, **kwargs):
         pass
@@ -91,16 +90,17 @@ class Intersection(BaseState):
         if time.time() - self.start_time > self.center_time:
             return ChoixDirection()
         
+
 class ChoixDirection(BaseState):
-    turn_w = 2 ############################ Remplacer 2 par bonne constante
-    turn_time = 2 ######################### A calibrer
+    turn_w = 0.8
+    turn_time = 2
 
     def __init__(self, **kwargs):
         self.start_time = time.time()
 
     def entry(self, **kwargs):
         instructions = kwargs['instructions']
-        self.direction = next(instructions) ################## A voir si on garde pop
+        self.direction = next(instructions)
 
     def during(self, **kwargs):
         v = kwargs['v']
@@ -116,8 +116,6 @@ class ChoixDirection(BaseState):
     def transition_conditions(self, *args, **kwargs):
         if time.time() - self.start_time > self.turn_time:
             return SuivreLigne()
-        
-        
 
 
 class SortieRoute(BaseState):
