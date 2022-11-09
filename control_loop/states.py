@@ -51,9 +51,17 @@ class ArretUrgence(BaseState):
     def __init__(self, **kwargs):
         self.start_time = time.time()
     
+    def entry(self, **kwargs):
+        # Ajouter l'obstacle / update les poids de la map
+        pass
+
     def during(self, **kwargs):
         consigne = (0,0)
         return consigne
+
+    def exit(self, **kwargs):
+        # Recalculer l'itineraire
+        pass
 
     def transition_conditions(self, *args, **kwargs):
         if time.time() - self.start_time > self.stop_time:
