@@ -90,6 +90,7 @@ class Intersection(BaseState):
         if time.time() - self.start_time > self.center_time:
             return ChoixDirection()
         
+
 class ChoixDirection(BaseState):
     turn_w = 0.8
     turn_time = 2
@@ -115,8 +116,6 @@ class ChoixDirection(BaseState):
     def transition_conditions(self, *args, **kwargs):
         if time.time() - self.start_time > self.turn_time:
             return SuivreLigne()
-        
-        
 
 
 class SortieRoute(BaseState):
