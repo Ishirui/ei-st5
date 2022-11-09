@@ -1,5 +1,4 @@
-import time
-from perception.py import perception
+from perception import perception
 
 ## GLOBAL VARIABLES
 v = 10
