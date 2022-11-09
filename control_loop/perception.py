@@ -9,21 +9,21 @@ camera=PiCamera()
 
 def test_camera():
     global camera
-    camera.start_preview()
-    my_file = open('test_photo.jpg', 'wb')
-    camera.capture(my_file)
+    
+    
     # At this point my_file.flush() has been called, but the file has
     # not yet been closed
-    my_file.close()
-    camera.stop_preview()
+    output = np.empty((240, 320, 3), dtype=np.uint8)
+    camera.capture(output, 'rgb')
+    return output
 
 #PRENDRE PHOTO
 
 def perception():
 # Input Image
 
-    test_camera()
-    image=cv2.imread("test_photo.jpg")
+    image=test_camera()
+
 
      
     scale_percent = 30 # percent of original size
@@ -97,6 +97,8 @@ def perception():
     #print("hits : ",hits)
     if hits >= 2:
         detect_inter=1
+        #prend une photo de l'intersection
+
 
 
 
