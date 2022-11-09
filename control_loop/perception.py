@@ -2,9 +2,10 @@ from __future__ import division
 import cv2
 import numpy as np
 import time
-from picamera import Picamera
 
-camera=Picamera()
+from picamera import PiCamera
+
+camera=PiCamera()
 
 def test_camera():
     global camera
@@ -101,3 +102,7 @@ def perception():
 
     erreur_orientation = image.shape[0]/2-cx
     return (erreur_orientation,detect_inter,detectOut)
+
+
+if __name__ == "__main__":
+    test_camera()
