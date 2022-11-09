@@ -1,6 +1,5 @@
 import numpy as np
 from dijkstra import dijkstra
-from routes import quadrillage
 
 def simple_graph(g, delivery_coords):
     v = len(delivery_coords)
@@ -41,24 +40,26 @@ def itineraire(g, delivery_coords):
     reponse_tsp =  tsp([], 0, 0, v, simple_g)
     it_points = [simple_g[reponse_tsp[1][v-i-1]][reponse_tsp[1][v-i]][1] for i in range(v)]
     
+    position_list = []
     it_exit_numbers = []
     turn_start = it_points[-1][-2]
     for i in it_points:
         turn_pos = i[0]
         turn_end = i[1]
-        print(unprecise_index(g[turn_pos], turn_end))
         exit_number = (unprecise_index(g[turn_pos], turn_end) - unprecise_index(g[turn_pos], turn_start))%len(g[turn_pos])
         it_exit_numbers.append(exit_number)
+        position_list.append(turn_pos)
         for j in range(len(i) - 2):
             turn_pos = i[j + 1]
             turn_start = i[j]
             turn_end = i[j + 2]
             exit_number = (unprecise_index(g[turn_pos], turn_end) - unprecise_index(g[turn_pos], turn_start))%len(g[turn_pos])
             it_exit_numbers.append(exit_number)
+            position_list.append(turn_pos)
         it_exit_numbers.append(-1)
         turn_start = turn_pos
     
-    return it_exit_numbers
+    return it_exit_numbers, position_list + [delivery_coords[0]]
     
 
 def unprecise_index(l, x):
@@ -96,9 +97,7 @@ def unprecise_index(l, x):
         [2, 1]
     ]
 ] """
-g = quadrillage(4)
 
-print(itineraire(g, [0, 7, 4, 3]))
 
                         
                     

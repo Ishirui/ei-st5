@@ -7,12 +7,9 @@ import time
 serial_file = open_serial_port(baudrate=115200)
 
 
-v_max = 10  # m.s-1     //A MODIFIER\\
+v_max = 0.45  # m.s-1     //VALEUR DONNEE POUR LES ACCUS//
 #Paramètres mécaniques
-r=1
-R=3
-M=1 #variable d'ajustement
-K=R/r*M
+K=0.17 #Variable d'ajustement
 ###################################################
 
 
@@ -20,7 +17,7 @@ def connect_to_arduino():
     global serial_file
     try:
         # Open serial port (for communication with Arduino)
-        serial_file = open_serial_port(baudrate=BAUDRATE)
+        serial_file = open_serial_port(baudrate=11520)
     except Exception as e:
         print('exception')
         raise e
@@ -59,6 +56,8 @@ def transmit(v,w):
         v_droite = -v_max
     if v_gauche<-v_max:
         v_gauche = -v_max
+
+    
     # il faut remettre la valeur de la vitesse entre 0 et 100%
     write_i8(serial_file, int(v_droite/v_max * 100))  # moteur droit
     write_i8(serial_file, int(v_gauche/v_max * 100))  # moteur gauche

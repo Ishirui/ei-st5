@@ -9,24 +9,27 @@ camera=PiCamera()
 
 def test_camera():
     global camera
-    camera.start_preview()
-    my_file = open('test_photo.jpg', 'wb')
-    camera.capture(my_file)
+    
+    camera.resolution = (100, 100)
+    camera.framerate = 24
     # At this point my_file.flush() has been called, but the file has
     # not yet been closed
-    my_file.close()
-    camera.stop_preview()
+    output = np.empty((240, 320, 3), dtype=np.uint8)
+    camera.capture(output, 'rgb')
+    output = output.reshape((112, 128, 3))
+    output = output[:100, :100, :]
+    return output
 
 #PRENDRE PHOTO
 
 def perception():
 # Input Image
 
-    test_camera()
-    image=cv2.imread("test_photo.jpg")
+    image=test_camera()
+
 
      
-    scale_percent = 30 # percent of original size
+    scale_percent = 100 # percent of original size
     width = int(image.shape[1] * scale_percent / 100)
     height = int(image.shape[0] * scale_percent / 100)
     dim = (width, height)
@@ -75,7 +78,7 @@ def perception():
         cx = int(M['m10']/M['m00'])
         cy = int(M['m01']/M['m00'])
         #print("Centroid of the biggest area: ({}, {})".format(cx, cy))
-        erreur = image.shape[0]/2-cx
+        erreur_orientation = image.shape[0]/2-cx
     else:
         detectOut=1
 
@@ -97,14 +100,12 @@ def perception():
     #print("hits : ",hits)
     if hits >= 2:
         detect_inter=1
+        #prend une photo de l'intersection
 
 
-    pt1 = (cx, cy)
-    pt2 = (cx, cy-300)
-    color = (0, 255, 0)
-    image=cv2.line(image,pt1,pt2,color)
 
-    erreur_orientation = image.shape[0]/2-cx
+
+   
     return (erreur_orientation,detect_inter,detectOut)
 
 
