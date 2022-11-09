@@ -94,7 +94,7 @@ class Intersection(BaseState):
 class ChoixDirection(BaseState):
     turn_w = 2 ############################ Remplacer 2 par bonne constante
 
-    def __init__(self, **kwargs):
+    def entry(self, **kwargs):
         instructions = kwargs['instructions']
         direction = instructions.pop() ################## A voir si on garde pop
 
