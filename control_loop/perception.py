@@ -15,6 +15,8 @@ def test_camera():
     # not yet been closed
     output = np.empty((240, 320, 3), dtype=np.uint8)
     camera.capture(output, 'rgb')
+    output = output.reshape((112, 128, 3))
+    output = output[:100, :100, :]
     return output
 
 #PRENDRE PHOTO
