@@ -50,12 +50,13 @@ def perception():
     #contours,hierarchy= cv2.findContours(dilated_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     im2,contours, hierarchy = cv2.findContours(dilated_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     img_contours = np.zeros(dilated_mask.shape)
-    cv2.drawContours(img_contours, contours, -1, (255,0,0), 3)
+    contours = sorted(contours, key=cv2.contourArea, reverse=True)[:1]
+    cv2.drawContours(img_contours, contours, -1, (255,0,0), -1)
     # Sort by area (keep only the biggest one)
 
     #cv2.imwrite('out_test.png', im2)
     #print (len(contours))
-    contours = sorted(contours, key=cv2.contourArea, reverse=True)[:1]
+    
 
 
     if len(contours) > 0:
@@ -68,6 +69,7 @@ def perception():
     else:
         detectOut=1
 
+    dilated_mask = img_contours
 
     #edge detection
     A=dilated_mask[:,0].tolist()
