@@ -10,7 +10,6 @@ camera=PiCamera()
 def test_camera():
     global camera
     camera.start_preview()
-    time.sleep(2)
     my_file = open('test_photo.jpg', 'wb')
     camera.capture(my_file)
     # At this point my_file.flush() has been called, but the file has
@@ -60,7 +59,7 @@ def perception():
 
     # Find the different contours
     #contours,hierarchy= cv2.findContours(dilated_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    contours, hierarchy = cv2.findContours(dilated_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    im2,contours, hierarchy = cv2.findContours(dilated_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     img_contours = np.zeros(dilated_mask.shape)
     cv2.drawContours(img_contours, contours, -1, (255,0,0), 3)
     # Sort by area (keep only the biggest one)
@@ -99,9 +98,6 @@ def perception():
     if hits >= 2:
         detect_inter=1
 
-    cv2.imshow("photo : ",dilated_mask)
-    if cv2.waitKey(0) & 0xff == 27:
-        cv2.destroyAllWindows()
 
     pt1 = (cx, cy)
     pt2 = (cx, cy-300)
@@ -112,4 +108,3 @@ def perception():
     return (erreur_orientation,detect_inter,detectOut)
 
 
-perception()
