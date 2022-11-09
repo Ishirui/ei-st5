@@ -1,5 +1,6 @@
-from perception import perception
-from states import *
+from control_loop.perception import perception
+from control_loop.states import *
+from comm_ard.envoi_commande_arduino import transmit
 
 ## GLOBAL VARIABLES
 v = 10
@@ -11,15 +12,17 @@ detect_out = 0
 
 curr_state = SuivreLigne()
 
+consigne = (0,0)
+
 def generator():
     while True:
         yield "F"
 
 
 instructions = generator() ################## A mieux initialiser
-
 def main():
     global curr_state
+    global consigne
     while True:
 
         erreur_orientation, detect_inter, detect_out = perception()
@@ -37,4 +40,8 @@ def main():
         # transmit(v,w)
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        consigne = (0,0)
+        transmit(consigne)

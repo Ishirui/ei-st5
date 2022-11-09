@@ -1,8 +1,6 @@
 # INITIALISATION DES FONCTIONS A IMPORTER UTILES
 
 
-from stateflow import fct_de_robin_et_pl  # //A MODIFIER\\
-
 from robust_serial import write_order, Order, write_i8, write_i16, read_i16
 
 from utils import open_serial_port
@@ -15,8 +13,7 @@ v_max = 10  # m.s-1     //A MODIFIER\\
 ###################################################
 
 
-def envoi_commande():
-    (v, w) = fct_de_robin_et_pl()  # //A MODIFIER\\
+def transmit(v,w):
 
     # on va dire au moteurs qu'on les modifie
     write_order(serial_file, Order.MOTOR)
