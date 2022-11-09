@@ -7,3 +7,5 @@
 *.dvi
 *.idx
 *.log
+
+__pycache__/
