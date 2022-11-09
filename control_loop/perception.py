@@ -9,11 +9,8 @@ camera=PiCamera()
 
 def test_camera():
     global camera
-    
-    camera.resolution = (100, 100)
+    camera.resolution= (100,(240/360)*100)
     camera.framerate = 24
-    # At this point my_file.flush() has been called, but the file has
-    # not yet been closed
     output = np.empty((240, 320, 3), dtype=np.uint8)
     camera.capture(output, 'rgb')
     output = output.reshape((112, 128, 3))
