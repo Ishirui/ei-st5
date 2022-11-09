@@ -26,8 +26,13 @@ def perception():
     test_camera()
     image=cv2.imread("test_photo.jpg")
 
-    test_camera()
-    image=cv2.imread("test_photo.jpg")
+     
+    scale_percent = 30 # percent of original size
+    width = int(image.shape[1] * scale_percent / 100)
+    height = int(image.shape[0] * scale_percent / 100)
+    dim = (width, height)
+    image = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
+    image = cv2.flip(image, -1)
 
     detectOut=0
     detect_inter=0
@@ -41,7 +46,7 @@ def perception():
     hsv = cv2.cvtColor(thresh1, cv2.COLOR_RGB2HSV)
 
     # Define range of white color in HSV
-    lower_white = np.array([0, 0, 168])
+    lower_white = np.array([0, 0, 160])
     upper_white = np.array([172, 111, 255])
     # Threshold the HSV image
     mask = cv2.inRange(hsv, lower_white, upper_white)
@@ -94,6 +99,9 @@ def perception():
     if hits >= 2:
         detect_inter=1
 
+    cv2.imshow("photo : ",dilated_mask)
+    if cv2.waitKey(0) & 0xff == 27:
+        cv2.destroyAllWindows()
 
     pt1 = (cx, cy)
     pt2 = (cx, cy-300)
@@ -104,5 +112,4 @@ def perception():
     return (erreur_orientation,detect_inter,detectOut)
 
 
-if __name__ == "__main__":
-    test_camera()
+perception()
