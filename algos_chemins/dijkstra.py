@@ -32,7 +32,7 @@ def dijkstra(g, a, b):
             res.append(n)
             unfinished =  (n != a)
 
-    return res, node_dist[b]
+    return node_dist[b], res
 
 g = [
     [
@@ -61,7 +61,7 @@ g = [
     ]
 ]
 
-print(dijkstra(g, 0, 2))
+#print(dijkstra(g, 0, 2))
 
 
 

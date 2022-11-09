@@ -22,14 +22,21 @@ def generator():
 instructions = generator() ################## A mieux initialiser
 def main():
     global curr_state
+<<<<<<< HEAD:stateflow.py
     global consigne
+=======
+    global instructions
+>>>>>>> ad976690b8f13258a853dce4dd0af018c11f7b89:control_loop/stateflow.py
     while True:
 
         erreur_orientation, detect_inter, detect_out = perception()
 
         new_state = curr_state.transition(detect_obs = detect_obs, detect_out = detect_out, detect_inter = detect_inter)
         if new_state != curr_state:
-            curr_state.exit()
+            
+            new_instr = curr_state.exit()
+            if new_instr:
+                instructions = new_instr
         
             curr_state = new_state
 
