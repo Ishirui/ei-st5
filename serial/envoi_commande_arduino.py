@@ -43,7 +43,7 @@ def connect_to_arduino():
     c = 1
     while (c!=b''):
         c = serial_file.read(1)
-
+connect_to_arduino()
 
 def envoi_commande(v,w):
     # on va dire au moteurs qu'on les modifie
