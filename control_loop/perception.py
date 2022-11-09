@@ -75,7 +75,7 @@ def perception():
         cx = int(M['m10']/M['m00'])
         cy = int(M['m01']/M['m00'])
         #print("Centroid of the biggest area: ({}, {})".format(cx, cy))
-        erreur = image.shape[0]/2-cx
+        erreur_orientation = image.shape[0]/2-cx
     else:
         detectOut=1
 
@@ -99,12 +99,8 @@ def perception():
         detect_inter=1
 
 
-    pt1 = (cx, cy)
-    pt2 = (cx, cy-300)
-    color = (0, 255, 0)
-    image=cv2.line(image,pt1,pt2,color)
 
-    erreur_orientation = image.shape[0]/2-cx
+   
     return (erreur_orientation,detect_inter,detectOut)
 
 
