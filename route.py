@@ -3,7 +3,7 @@ from picamera.array import PiRGBArray
 from time import sleep
 from traitement import traitement
 from comm_ard.utils import open_serial_port
-from comm_ard.robust_serial import write_order, Order, write_i8
+from comm_ard.robust_serial import write_order, Order
 from comm_ard.envoi_commande_arduino import transmit
 import numpy as np
 
@@ -11,45 +11,46 @@ import numpy as np
 
 
 def main():
+
+    # On récupère l'image depuis la caméra, on la traite (cf traitement.py)
+
     image = next(frame_source).array
     image = traitement(image)
 
-    left = -1
-    right = -1
-    middle = middle_x
+    # L'indice sera l'endroit où est la ligne blanche, -1 veut dire qu'il n'y a pas de ligne blanche en vue
 
-    index = -1
+    index_lb = -1
+
+    # On récupère l'indice de la ligne blanche avec la moyenne des indices des pixels blancs seulement au milieu de la caméra (j'ai pas su faire plus malin)
+
     MAX = np.max(image[middle_y][:])
-    WHERE = np.where(image[middle_y] == MAX)
+    WHERE = np.where(image[middle_y][:] == MAX)
     try_index = int(np.mean(WHERE[0]))
+
+    # on vérifie qu'il s'agit bien d'un pixel blanc et non pas d'un noir
+
     if image[middle_y][try_index] > 200:
-        index = try_index
-    print(index)
-    if index > 0:
-        transmit(0,0)
-        w = -2*(middle - index)/camera.resolution[0] * rot
-        transmit(0, w)
+        index_lb = try_index
+
+    # index_lb est positif s'il a été affecté dans le bloc if ci-dessus
+
+    if index_lb >= 0:
+        transmit(0, 0)
+        w = 2*(middle_x - index_lb)/camera.resolution[0] * rot
+        transmit(v, w)
     else:
         transmit(v, 0)
 
-    # try_left = where(image[middle_y][:middle_x] ==
-    #                  max(image[middle_y][:middle_x]))[0][0]
-    # try_right = where(image[middle_y][middle_x:] ==
-    #                   max(image[middle_y][middle_x:]))[0][0]
-    # if image[middle_y][left] > 200:
-    #     left = try_left
-    # if image[middle_y][middle_x+right] > 200:
-    #     right = try_right
-    # if left != -1 and right != -1:
-    #     middle = (left + right)/2
-    # if abs(middle_x-middle) > 25:
-    #     transmit(0.15, (middle_x - middle)/camera.resolution[0] * rot)
-    # else:
-    #     transmit(0.15, 0)
+    # cette ligne est nécessaire pour que la caméra marche (je sais pas pourquoi)
+
     rawCapture.truncate(0)
 
 
 if __name__ == '__main__':
+
+    ################################################################################################
+    # connection à l'arduino
+    ################################################################################################
 
     global serial_file
     try:
@@ -73,17 +74,24 @@ if __name__ == '__main__':
             is_connected = True
             print('connecté')
 
+    ################################################################################################
+    # Définition des variables dont on se sert, initialisation de la caméra
+    ################################################################################################
+
     middle_x = 160//2
     middle_y = 128//2
 
     camera = PiCamera()
     camera.resolution = (160, 128)
-    camera.framerate = 42
+    camera.framerate = 30
     rawCapture = PiRGBArray(camera, size=camera.resolution)
     frame_source = camera.capture_continuous(
         rawCapture, format="bgr", use_video_port=True)
 
     rot = 10
     v = 0.2
+
+    # c'est tipar
+
     while True:
         main()
