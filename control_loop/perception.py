@@ -18,6 +18,7 @@ def perception():
 
     # Input Image
     image = next(frame_source).array
+    #image=cv2.imread("test_photo.jpg")
     image = cv2.flip(image, -1)
 
     cv2.imshow("Image non traitée", image)
@@ -46,10 +47,31 @@ def perception():
     dilated_mask = cv2.dilate(eroded_mask, kernel_dilate, iterations=1)
 
     # Find the different contours
-    _, contours, _ = cv2.findContours(dilated_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(dilated_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     img_contours = np.zeros(dilated_mask.shape)
     contours = sorted(contours, key=cv2.contourArea, reverse=True)[:1] # Sort by area (keep only the biggest one)
     cv2.drawContours(img_contours, contours, -1, (255,0,0), -1)
+    print("shapes",dilated_mask.shape,img_contours.shape)
+
+    kernel1 = np.array([[1, 1, 1],
+                    [0, 0, 0],
+                    [-1, -1, -1]])
+    
+    horizontal = cv2.filter2D(src=img_contours, ddepth=-1, kernel=kernel1)
+    print(horizontal.shape)
+    cv2.imshow("horizontal", horizontal)
+    cv2.waitKey(0)
+    n_horizontal = []
+
+    for row in horizontal.transpose():
+        maxi = max(row)
+        n_horizontal.append([maxi for _ in row])
+
+    horizontal = np.array(n_horizontal).transpose()
+    # Show extracted horizontal lines
+    cv2.imshow("n_horizontal", horizontal)
+    cv2.waitKey(0)
+
 
 
     if len(contours) > 0: # Si un blob est detectee
