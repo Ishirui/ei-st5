@@ -10,6 +10,10 @@
 #define LEFT 0
 #define RIGHT 1
 
+#define infraredPin A0;
+float volts = 0;
+int distance = 80; //cm
+
 int coder[2] = {
     0, 0};
 int lastSpeed[2] = {
@@ -226,6 +230,11 @@ void get_messages_from_serial()
         coder[RIGHT] = 0;
         break;
       }
+      case READIR:
+      {
+        write_i16(MeasureDistanceIR);
+        break;
+      }
 
       // Unknown order
       default:
@@ -261,6 +270,21 @@ void wait_for_bytes(int num_bytes, unsigned long timeout)
   {
   }
 }
+
+int MeasureDistanceIR(){
+  volts = analogRead(infraredPin)*5.0/1024.0;
+  if (volts < 1){
+    distance = 28.0/volts;
+  }
+  else{
+    volts -=0.28;
+    distance = 20.2/volts;
+  }
+  return distance;
+}
+
+
+
 
 // NOTE : Serial.readBytes is SLOW
 // this one is much faster, but has no timeout
