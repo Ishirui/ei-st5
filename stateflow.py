@@ -1,11 +1,15 @@
 from control_loop.perception import perception
 from control_loop.states import *
 from comm_ard.envoi_commande_arduino import transmit
+from algos_chemins.routes import deplacement_quadrillage, quadrillage
 from control_loop.obstacle import distance_capteur
 
 ## GLOBAL VARIABLES
 v = 0.2 # Vitesse de consigne, en m.s^-1 - doit être compris entre ~0.15 et 0.45
 thresh_obs = 20 # Distance limite de detection d'obstacle en cm
+
+mode = "8" # "8" ou "quad" pour 8 ou quadrillage
+quadrillage = (4, [0,0], [[3,3], [2,2], [0,3]])
 
 erreur_orientation = 0
 detect_obs = 0
@@ -16,11 +20,14 @@ curr_state = SuivreLigne()
 
 consigne = (0,0)
 
-def generator():
-    while True:
-        yield "F"
+if mode == "8":
+    def generator():
+        while True:
+            yield "milieu"
+else:
+    generator = (x for x in deplacement_quadrillage(*quadrillage))
 
-instructions = generator() ################## A mieux initialiser
+instructions = generator()
 
 def main():
     global curr_state
@@ -45,7 +52,7 @@ def main():
         
             curr_state = new_state
 
-            curr_state.entry(instructions = instructions)
+            curr_state.entry(v=v, instructions = instructions)
 
         consigne = curr_state.during(v = v, erreur_orientation = erreur_orientation)
 
@@ -53,7 +60,7 @@ def main():
             consigne = (0,0)
 
         transmit(*consigne)
-        print(consigne,curr_state)
+        #print(consigne,curr_state)
 
 if __name__ == "__main__":
     try:

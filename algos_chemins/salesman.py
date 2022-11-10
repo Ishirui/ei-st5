@@ -1,5 +1,5 @@
 import numpy as np
-from dijkstra import dijkstra
+from .dijkstra import dijkstra
 
 def simple_graph(g, delivery_coords):
     v = len(delivery_coords)
