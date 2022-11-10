@@ -3,7 +3,7 @@ import cv2
 
 def traitement(img):
     modif = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    modif = cv2.threshold(modif, 200, 255, cv2.THRESH_BINARY)[1]
+    modif = cv2.threshold(modif, 170, 255, cv2.THRESH_BINARY)[1]
     #modif = cv2.erode(modif, cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5)), iterations=1)
     return modif
 

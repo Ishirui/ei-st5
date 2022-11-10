@@ -6,12 +6,12 @@ from comm_ard.obstacle import distance_capteur
 import time
 
 ## GLOBAL VARIABLES
-v = 0.3 # Vitesse de consigne, en m.s^-1 - doit être compris entre ~0.15 et 0.45
+v = 0.5 # Vitesse de consigne, en m.s^-1 - doit être compris entre ~0.15 et 0.45
 thresh_obs = 50 # Distance limite de detection d'obstacle en cm
 detect_obs_thresh = 5 #Nb de hits qu'il faut avant de lancer un arrêt d'urgence
 
 
-mode = "quad" # "8" ou "quad" pour 8 ou quadrillage
+mode = "8" # "8" ou "quad" pour 8 ou quadrillage
 N = 4 # Nombre de noeuds sur le cote du quadrillage
 point_depart = [0,0]
 livraisons = [[3,3], [2,2], [0,3]]

@@ -5,7 +5,7 @@ from traitement import traitement
 from comm_ard.utils import open_serial_port
 from comm_ard.robust_serial import write_order, Order, write_i8
 from comm_ard.envoi_commande_arduino import transmit
-from numpy import where
+import numpy as np
 
 #############################################
 
@@ -19,15 +19,16 @@ def main():
     middle = middle_x
 
     index = -1
-
-    try_index = where(image[middle_y][:])[0][0]
-
+    MAX = np.max(image[middle_y][:])
+    WHERE = np.where(image[middle_y] == MAX)
+    try_index = int(np.mean(WHERE[0]))
     if image[middle_y][try_index] > 200:
         index = try_index
-
+    print(index)
     if index > 0:
-        w = (middle - index) * rot
-        transmit(v, w)
+        transmit(0,0)
+        w = -2*(middle - index)/camera.resolution[0] * rot
+        transmit(0, w)
     else:
         transmit(v, 0)
 
@@ -77,12 +78,12 @@ if __name__ == '__main__':
 
     camera = PiCamera()
     camera.resolution = (160, 128)
-    camera.framerate = 30
+    camera.framerate = 42
     rawCapture = PiRGBArray(camera, size=camera.resolution)
     frame_source = camera.capture_continuous(
         rawCapture, format="bgr", use_video_port=True)
 
-    rot = 0.2
+    rot = 10
     v = 0.2
     while True:
         main()
