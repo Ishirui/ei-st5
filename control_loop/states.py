@@ -141,7 +141,7 @@ class ChoixDirection(BaseState):
             return Stop()
         
         if time.time() - self.start_time > self.turn_time:
-            if self.direction in ["droite", "gauche"] and erreur_orientation < 0.1 :
+            if self.direction in ["droite", "gauche"] and abs(erreur_orientation) < 0.1 :
                 return SuivreLigne
             return SuivreLigne()
 
