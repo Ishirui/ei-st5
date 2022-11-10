@@ -6,7 +6,7 @@ import time
 from picamera import PiCamera
 from picamera.array import PiRGBArray
 
-camera = PiCamera()
+camera = PiCamera(sensor_mode = 2)
 camera.resolution = (640//4, 480//4)
 camera.framerate = 32
 rawCapture = PiRGBArray(camera, size=camera.resolution)
@@ -14,13 +14,13 @@ rawCapture = PiRGBArray(camera, size=camera.resolution)
 
 frame_source = camera.capture_continuous(rawCapture, format="bgr", use_video_port=True)
 
-def perception():
+def perception(feedback = False):
 
     # Input Image
     image = next(frame_source).array
     #image = cv2.flip(image, -1)
 
-    #cv2.imshow("Image non traitée", image)
+    if feedback: cv2.imshow("Image non traitée", image)
 
     # Output initializing
     detectOut = 0
@@ -81,8 +81,7 @@ def perception():
     if roads_detected >= 1:
         detect_inter = 1
     
-
-    #cv2.imshow("Image traitée",img_contours)
+    if feedback: cv2.imshow("Image traitée",img_contours)
     key = cv2.waitKey(1) & 0xFF
 
 
@@ -96,4 +95,4 @@ def perception():
 
 if __name__ == "__main__":
     while True:
-        perception()
+        perception(feedback = True)
