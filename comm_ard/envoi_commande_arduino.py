@@ -8,8 +8,8 @@ serial_file = open_serial_port(baudrate=115200)
 
 
 v_max = 0.45  # m.s-1     //VALEUR DONNEE POUR LES ACCUS//
-#Paramètres mécaniques
-K=0.17 #Variable d'ajustement
+# Paramètres mécaniques
+K = 0.17  # Variable d'ajustement
 ###################################################
 
 
@@ -38,31 +38,28 @@ def connect_to_arduino():
 
     time.sleep(2)
     c = 1
-    while (c!=b''):
+    while (c != b''):
         c = serial_file.read(1)
+
 
 connect_to_arduino()
 
-def transmit(v,w):
+
+def transmit(v, w):
     # on va dire au moteurs qu'on les modifie
     write_order(serial_file, Order.MOTOR)
 
     v_droite = v + K*w
     v_gauche = v - K*w
-    if v_droite>v_max:
+    if v_droite > v_max:
         v_droite = v_max
-    if v_gauche>v_max:
+    if v_gauche > v_max:
         v_gauche = v_max
-    if v_droite<-v_max:
+    if v_droite < -v_max:
         v_droite = -v_max
-    if v_gauche<-v_max:
+    if v_gauche < -v_max:
         v_gauche = -v_max
 
-    
     # il faut remettre la valeur de la vitesse entre 0 et 100%
     write_i8(serial_file, int(v_droite/v_max * 100))  # moteur droit
     write_i8(serial_file, int(v_gauche/v_max * 100))  # moteur gauche
-
-
-def utilisation_capteurs():
-    read_i16(serial_file)  # on lit ce que l'arduino envoie
