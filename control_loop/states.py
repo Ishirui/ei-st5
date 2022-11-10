@@ -26,7 +26,7 @@ class BaseState:
 
 class SuivreLigne(BaseState):
     outer_correction_gain = 1.5 ######################### Remplacer par le bon gain
-    inner_correction_gain = 2
+    inner_correction_gain = 2.5
     
     def during(self, **kwargs):
         v = kwargs['v']
