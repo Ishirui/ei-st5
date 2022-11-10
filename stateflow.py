@@ -43,7 +43,7 @@ def main():
             erreur_orientation, detect_inter, detect_out = 0,0,0
 
 
-        new_state = curr_state.transition(detect_obs = detect_obs, detect_out = detect_out, detect_inter = detect_inter)
+        new_state = curr_state.transition(detect_obs = detect_obs, detect_out = detect_out, detect_inter = detect_inter, erreur_orientation = erreur_orientation)
         if new_state != curr_state:
             
             new_instr = curr_state.exit()
