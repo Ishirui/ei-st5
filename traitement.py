@@ -1,23 +1,21 @@
-from cv2 import imread, cvtColor, COLOR_BGR2GRAY, imshow, waitKey, destroyAllWindows, threshold, THRESH_BINARY, resize, getStructuringElement, erode, MORPH_RECT, GaussianBlur, dilate, SimpleBlobDetector
+import cv2
 
 
 def traitement(img):
-    modif = cvtColor(img, COLOR_BGR2GRAY)
-    modif = threshold(modif, 160, 255, THRESH_BINARY)[1]
-    modif = erode(modif, getStructuringElement(
-        MORPH_RECT, (5, 5)), iterations=3)
-    detector = SimpleBlobDetector()
+    modif = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    modif = cv2.threshold(modif, 160, 255, cv2.THRESH_BINARY)[1]
+    #modif = cv2.erode(modif, cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5)), iterations=1)
     return modif
 
 
-img = imread("C:\\Users\\lheur\\Desktop\\photo_2.jpg")
-modif = traitement(img)
+# img = cv2.imread("C:\\Users\\lheur\\Desktop\\photo_2.jpg")
+# modif = traitement(img)
 
-img = resize(img, (400, 400))
-modif = resize(modif, (400, 400))
+# img = cv2.resize(img, (400, 400))
+# modif = cv2.resize(modif, (400, 400))
 
 
-imshow('og', img)
-imshow('modif', modif)
-waitKey(0)
-destroyAllWindows()
+# cv2.imshow('og', img)
+# cv2.imshow('modif', modif)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()

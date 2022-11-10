@@ -4,31 +4,34 @@ from time import sleep
 from traitement import traitement
 from comm_ard.utils import open_serial_port
 from comm_ard.robust_serial import write_order, Order, write_i8
+from comm_ard.envoi_commande_arduino import transmit
+
 
 #############################################
 
-middle_x = 0
-middle_y = 0
-middle = 0
-left = 0
-right = 0
 
-v = 0.15
+def main():
+    image = next(frame_source).array
+    image = traitement(image)
+
+    left = -1
+    right = -1
+
+    try_left = image[middle_y][:middle_x].index(
+        max(image[middle_y][:middle_x]))
+    try_right = image[middle_y][middle_x:].index(
+        max(image[middle_y][middle_x:]))
+    if image[middle_y][left] > 200:
+        left = try_left
+    if image[middle_y][middle_x+right] > 200:
+        right = try_right
+    if left != -1 and right != -1:
+        middle = (left + right)/2
+    transmit(0.15, (middle_x - middle)/camera.resolution[0] * rot)
 
 
-def setup_camera():
-    camera = PiCamera()
-    camera.resolution = (640//4, 480//4)
-    camera.framerate = 30
-    rawCapture = PiRGBArray(camera, size = camera.resolution)
+if __name__ == '__main__':
 
-
-def setup():
-    middle_x = 640//8
-    middle_y = 480//8
-
-
-def connect_to_arduino():
     global serial_file
     try:
         # Open serial port (for communication with Arduino)
@@ -51,48 +54,17 @@ def connect_to_arduino():
             is_connected = True
             print('connecté')
 
+    middle_x = 640//8
+    middle_y = 480//8
 
-def main():
-    image = camera.capture(rawCapture, format ='rgb')
-    image = traitement(rawCapture)
-    Sum_middle = []
-    for i in range(len(rawCapture[:][middle_y][:])):
-        Sum_middle.append(sum(rawCapture[i][middle_y]))
-    left = Sum[:middle_x].index(max(Sum_middle[:middle_x]))
-    right = Sum[middle_x:].index(max(Sum_middle[middle_x:]))
-    middle = (left+right)/2
-    erreur = middle_x - middle
-    transmit(v, erreur * v_max)
+    camera = PiCamera()
+    camera.resolution = (640//4, 480//4)
+    camera.framerate = 30
+    rawCapture = PiRGBArray(camera, size=camera.resolution)
+    frame_source = camera.capture_continuous(
+        rawCapture, format="bgr", use_video_port=True)
 
+    rot = 0.2
 
-v_max = 0.45  # m.s-1     //VALEUR DONNEE POUR LES ACCUS//
-# Paramètres mécaniques
-K = 0.17
-
-
-def transmit(v, w):
-    # on va dire au moteurs qu'on les modifie
-    write_order(serial_file, Order.MOTOR)
-
-    v_droite = v + K*w
-    v_gauche = v - K*w
-    if v_droite > v_max:
-        v_droite = v_max
-    if v_gauche > v_max:
-        v_gauche = v_max
-    if v_droite < -v_max:
-        v_droite = -v_max
-    if v_gauche < -v_max:
-        v_gauche = -v_max
-
-    # il faut remettre la valeur de la vitesse entre 0 et 100%
-    write_i8(serial_file, int(v_droite/v_max * 100))  # moteur droit
-    write_i8(serial_file, int(v_gauche/v_max * 100))  # moteur gauche
-
-
-if __name__ == '__main__':
-    setup()
-    setup_camera()
-    connect_to_arduino()
     while True:
         main()
