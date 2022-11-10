@@ -23,7 +23,7 @@ def quadrillage(n, aretes_cassees):
 
 def deplacement_quadrillage(n, start, delivery_coords, before_start, aretes_cassees):
     g = quadrillage(n, aretes_cassees)
-    print(g[n*aretes_cassees[0][0][1] + n*aretes_cassees[0][0][0]])
+    #print(g[n*aretes_cassees[0][0][1] + n*aretes_cassees[0][0][0]])
     d_c = [start[1]*n + start[0]] + [i[1]*n + i[0] for i in delivery_coords]
     it_sorties, pos_list = itineraire(g, d_c)
     manoeuvres = []
