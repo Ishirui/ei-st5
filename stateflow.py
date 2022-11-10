@@ -1,6 +1,7 @@
 from control_loop.perception import perception
 from control_loop.states import *
 from comm_ard.envoi_commande_arduino import transmit
+from control_loop.obstacle import distance_capteur
 
 ## GLOBAL VARIABLES
 v = 0.2 # Vitesse de consigne, en m.s^-1 - doit être compris entre ~0.15 et 0.45
@@ -29,7 +30,7 @@ def main():
 
         try:
             erreur_orientation, detect_inter, detect_out = perception()
-            # detect_obs = bool(dist_capteur() <= thresh_obs)
+            detect_obs = bool(distance_capteur() <= thresh_obs)
         except Exception as e:
             print("Erreur de perception:"+str(e))
             erreur_orientation, detect_inter, detect_out = 0,0,0
