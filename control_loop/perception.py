@@ -11,6 +11,8 @@ camera.resolution = (640//4, 480//4)
 camera.framerate = 32
 rawCapture = PiRGBArray(camera, size=camera.resolution)
 
+brightness_thresh = 0.1
+
 
 frame_source = camera.capture_continuous(rawCapture, format="bgr", use_video_port=True)
 
@@ -46,11 +48,10 @@ def perception(feedback = False):
     dilated_mask = cv2.dilate(eroded_mask, kernel_dilate, iterations=1)
 
     # Find the different contours
-    contours, _ = cv2.findContours(dilated_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    _, contours, _ = cv2.findContours(dilated_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     img_contours = np.zeros(dilated_mask.shape)
     contours = sorted(contours, key=cv2.contourArea, reverse=True)[:1] # Sort by area (keep only the biggest one)
     cv2.drawContours(img_contours, contours, -1, (255,0,0), -1)
-    print("shapes",dilated_mask.shape,img_contours.shape)
 
     if len(contours) > 0: # Si un blob est detectee
         M = cv2.moments(contours[0])
@@ -82,40 +83,58 @@ def perception(feedback = False):
     #     detect_inter = 1
     
 
-
-
     # New version of intersection detection
     
-    expected_corners = 3
-    blur = cv2.blur(image,(6,6))
-    _,thresh1 = cv2.threshold(blur,168,255,cv2.THRESH_BINARY)
-    hsv = cv2.cvtColor(thresh1, cv2.COLOR_RGB2HSV)
+    # expected_corners = 3
+    # blur = cv2.blur(image,(6,6))
+    # _,thresh1 = cv2.threshold(blur,168,255,cv2.THRESH_BINARY)
+    # hsv = cv2.cvtColor(thresh1, cv2.COLOR_RGB2HSV)
 
-    # Define range of white color in HSV
-    lower_white = np.array([0, 0, 168])
-    upper_white = np.array([172, 111, 255])
-    # Threshold the HSV image
-    mask = cv2.inRange(hsv, lower_white, upper_white)
+    # # Define range of white color in HSV
+    # lower_white = np.array([0, 0, 168])
+    # upper_white = np.array([172, 111, 255])
+    # # Threshold the HSV image
+    # mask = cv2.inRange(hsv, lower_white, upper_white)
 
-    kernel_erode = np.ones((6,6), np.uint8)
-    eroded_mask = cv2.erode(mask, kernel_erode, iterations=1)
-    kernel_dilate = np.ones((4,4), np.uint8)
-    dilated_mask = cv2.dilate(eroded_mask, kernel_dilate, iterations=1)
-    gray = np.float32(dilated_mask)
+    # kernel_erode = np.ones((6,6), np.uint8)
+    # eroded_mask = cv2.erode(mask, kernel_erode, iterations=1)
+    # kernel_dilate = np.ones((4,4), np.uint8)
+    # dilated_mask = cv2.dilate(eroded_mask, kernel_dilate, iterations=1)
+    # gray = np.float32(dilated_mask)
 
-    dst = cv2.cornerHarris(gray,5,3,0.10)
-    corners = cv2.goodFeaturesToTrack(gray, 5,0.5,20)
-    corners = np.int0(corners)
+    # dst = cv2.cornerHarris(gray,5,3,0.10)
+    # corners = cv2.goodFeaturesToTrack(gray, 5,0.5,20)
+    # corners = np.int0(corners)
 
-    if len(corners) >= expected_corners:
+    # if len(corners) >= expected_corners:
+    #     detect_inter = 1
+
+    # Counting brightness in blurred image
+
+    # img_contours_blurred = cv2.blur(img_contours, (50,50))
+    # prop_lit_pixels = np.sum(img_contours_blurred)/(255*camera.resolution[0]*camera.resolution[1])
+
+    # if prop_lit_pixels > 0.15:
+    #     detect_inter = 1
+    # else:
+    #     detect_inter = 0
+
+    # print(prop_lit_pixels)
+
+    # if feedback: cv2.imshow("Image traitée",img_contours)
+    # key = cv2.waitKey(1) & 0xFF
+
+    # Maxime's detection (edge detection + looking at total horizontal brightness)
+
+    kernel1 = np.array([[1/9, 1/9, 1/9], [0, 0, 0], [-1/9, -1/9, -1/9]])
+    horizontal = cv2.filter2D(src = img_contours, ddepth=-1, kernel=kernel1)
+    ligne = horizontal.max(axis=0)
+    brightness = np.sum(ligne)/(len(ligne)*255)
+
+    if brightness > brightness_thresh:
         detect_inter = 1
-
-
-
-
-    if feedback: cv2.imshow("Image traitée",img_contours)
-    key = cv2.waitKey(1) & 0xFF
-
+    else:
+        detect_inter = 0
 
     # Clear the stream in preparation for the next frame
     rawCapture.truncate(0)

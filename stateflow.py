@@ -1,4 +1,3 @@
-from email.errors import FirstHeaderLineIsContinuationDefect
 from control_loop.perception import perception
 from control_loop.states import *
 from comm_ard.envoi_commande_arduino import transmit
@@ -8,11 +7,11 @@ import time
 
 ## GLOBAL VARIABLES
 v = 0.2 # Vitesse de consigne, en m.s^-1 - doit être compris entre ~0.15 et 0.45
-thresh_obs = 15 # Distance limite de detection d'obstacle en cm
-detect_obs_thresh = 3 #Nb de hits qu'il faut avant de lancer un arrêt d'urgence
+thresh_obs = 35 # Distance limite de detection d'obstacle en cm
+detect_obs_thresh = 5 #Nb de hits qu'il faut avant de lancer un arrêt d'urgence
 
 
-mode = "8" # "8" ou "quad" pour 8 ou quadrillage
+mode = "quad" # "8" ou "quad" pour 8 ou quadrillage
 quadrillage = (4, [0,0], [[3,3], [2,2], [0,3]], [0,1])
 
 erreur_orientation = 0
@@ -52,8 +51,11 @@ def main():
         try:
             erreur_orientation, detect_inter, detect_out = perception()
             detect_obs = False
-            if distance_capteur() <= thresh_obs:
+            x = distance_capteur()
+            if 0 < x <= thresh_obs:
                 detect_obs_count += 1
+            else:
+                detect_obs_count = 0
                 
 
             if detect_obs_count >= detect_obs_thresh :
@@ -63,7 +65,6 @@ def main():
             print("Erreur de perception:"+str(e))
             erreur_orientation, detect_inter, detect_out = 0,0,0
 
-        detect_inter = 0
 
         new_state = curr_state.transition(detect_obs = detect_obs, detect_out = detect_out, detect_inter = detect_inter, erreur_orientation = erreur_orientation)
         if new_state != curr_state:
@@ -84,7 +85,16 @@ def main():
         if consigne is None:
             consigne = (0,0)
 
+        print(consigne)
         transmit(*consigne)
+
+def failsafe(start):
+    try:
+        while time.time() - start < 1:
+            transmit(*consigne)
+        return
+    except:
+        failsafe(start)
 
 if __name__ == "__main__":
     try:
@@ -92,5 +102,6 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         consigne = (0,0)
         start = time.time()
-        while time.time() - start < 1:
-            transmit(*consigne)
+        failsafe(start)
+
+
