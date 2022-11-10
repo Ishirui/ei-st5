@@ -103,7 +103,7 @@ class Intersection(BaseState):
 
 class ChoixDirection(BaseState):
     turn_w = 1.6
-    turn_time = 1
+    turn_time = 0.3
 
     def __init__(self, **kwargs):
         self.start_time = time.time()
@@ -135,10 +135,14 @@ class ChoixDirection(BaseState):
         return self.consigne
 
     def transition_conditions(self, *args, **kwargs):
+        erreur_orientation = kwargs['erreur_orientation']
+        
         if self.direction == "STOP":
             return Stop()
         
         if time.time() - self.start_time > self.turn_time:
+            if self.direction in ["droite", "gauche"] and erreur_orientation < 0.1 :
+                return SuivreLigne
             return SuivreLigne()
 
 
