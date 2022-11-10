@@ -3,10 +3,11 @@ from control_loop.states import *
 from comm_ard.envoi_commande_arduino import transmit
 from algos_chemins.routes import deplacement_quadrillage, quadrillage
 from comm_ard.obstacle import distance_capteur
+import time
 
 ## GLOBAL VARIABLES
 v = 0.2 # Vitesse de consigne, en m.s^-1 - doit être compris entre ~0.15 et 0.45
-thresh_obs = 20 # Distance limite de detection d'obstacle en cm
+thresh_obs = 15 # Distance limite de detection d'obstacle en cm
 
 mode = "8" # "8" ou "quad" pour 8 ou quadrillage
 quadrillage = (4, [0,0], [[3,3], [2,2], [0,3]], [0,1])
@@ -76,5 +77,6 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         consigne = (0,0)
-        transmit(*consigne)
-        time.sleep(1)
+        start = time.time()
+        while time.time() - start < 1:
+            transmit(*consigne)

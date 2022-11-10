@@ -20,7 +20,7 @@ def perception():
     image = next(frame_source).array
     #image = cv2.flip(image, -1)
 
-    cv2.imshow("Image non traitée", image)
+    #cv2.imshow("Image non traitée", image)
 
     # Output initializing
     detectOut = 0
@@ -82,7 +82,7 @@ def perception():
         detect_inter = 1
     
 
-    cv2.imshow("Image traitée",img_contours)
+    #cv2.imshow("Image traitée",img_contours)
     key = cv2.waitKey(1) & 0xFF
 
 

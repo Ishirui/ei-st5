@@ -1,5 +1,5 @@
 import numpy as np
-from salesman import itineraire, unprecise_index
+from .salesman import itineraire, unprecise_index
 
 def quadrillage(n):
     g = [[] for i in range(n**2)]
