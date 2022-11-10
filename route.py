@@ -18,9 +18,9 @@ def main():
     right = -1
 
     try_left = where(image[middle_y][:middle_x] ==
-                     max(image[middle_y][:middle_x]))[0]
+                     max(image[middle_y][:middle_x]))[0][0]
     try_right = where(image[middle_y][middle_x:] ==
-                      max(image[middle_y][middle_x:]))[0]
+                      max(image[middle_y][middle_x:]))[0][0]
     if image[middle_y][left] > 200:
         left = try_left
     if image[middle_y][middle_x+right] > 200:
