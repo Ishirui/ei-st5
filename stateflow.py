@@ -50,7 +50,7 @@ def main():
 
         detect_inter = 0
 
-        new_state = curr_state.transition(detect_obs = detect_obs, detect_out = detect_out, detect_inter = detect_inter)
+        new_state = curr_state.transition(detect_obs = detect_obs, detect_out = detect_out, detect_inter = detect_inter, erreur_orientation = erreur_orientation)
         if new_state != curr_state:
         
 
