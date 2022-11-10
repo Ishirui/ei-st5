@@ -24,15 +24,21 @@ if mode == "8":
     def generator():
         while True:
             yield "milieu"
+    instructions = generator()
 else:
-    generator = (x for x in deplacement_quadrillage(*quadrillage))
+    instructions = (x for x in deplacement_quadrillage(*quadrillage))
+    print(deplacement_quadrillage(*quadrillage))
 
-instructions = generator()
+
 
 def main():
     global curr_state
     global consigne
     global instructions
+    global detect_obs
+    global erreur_orientation
+    global detect_inter
+    global detect_out
     while True:
 
         try:
@@ -42,10 +48,12 @@ def main():
             print("Erreur de perception:"+str(e))
             erreur_orientation, detect_inter, detect_out = 0,0,0
 
+        detect_inter = 0
 
         new_state = curr_state.transition(detect_obs = detect_obs, detect_out = detect_out, detect_inter = detect_inter)
         if new_state != curr_state:
-            
+        
+
             new_instr = curr_state.exit()
             if new_instr:
                 instructions = new_instr
@@ -54,13 +62,14 @@ def main():
 
             curr_state.entry(v=v, instructions = instructions)
 
+            print(curr_state)
+
         consigne = curr_state.during(v = v, erreur_orientation = erreur_orientation)
 
         if consigne is None:
             consigne = (0,0)
 
         transmit(*consigne)
-        #print(consigne,curr_state)
 
 if __name__ == "__main__":
     try:
@@ -68,3 +77,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         consigne = (0,0)
         transmit(*consigne)
+        time.sleep(1)

@@ -18,7 +18,7 @@ def perception():
 
     # Input Image
     image = next(frame_source).array
-    image = cv2.flip(image, -1)
+    #image = cv2.flip(image, -1)
 
     cv2.imshow("Image non traitée", image)
 
@@ -28,12 +28,12 @@ def perception():
     erreur_orientation = 0
 
     # Convert to HSV color space
-    blur = cv2.blur(image,(5,5))
+    blur = cv2.blur(image,(10,10))
     _, thresh1 = cv2.threshold(blur,168,255,cv2.THRESH_BINARY)
     hsv = cv2.cvtColor(thresh1, cv2.COLOR_RGB2HSV)
 
     # Define range of white color in HSV
-    lower_white = np.array([0, 0, 160])
+    lower_white = np.array([0, 0, 80])
     upper_white = np.array([172, 111, 255])
     
     # Threshold the HSV image
@@ -67,7 +67,7 @@ def perception():
     bord_haut = img_contours[0,:].tolist()
     bord_droit = np.transpose(img_contours[:,-1]).tolist()
 
-    bord = bord_gauche + bord_haut + bord_droit
+    bord = bord_gauche + bord_droit
 
     roads_detected = 0
     detecte = 0
@@ -78,7 +78,7 @@ def perception():
             roads_detected += 1
             detecte = 0
 
-    if roads_detected >= 2:
+    if roads_detected >= 1:
         detect_inter = 1
     
 
