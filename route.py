@@ -5,7 +5,7 @@ from traitement import traitement
 from comm_ard.utils import open_serial_port
 from comm_ard.robust_serial import write_order, Order, write_i8
 from comm_ard.envoi_commande_arduino import transmit
-
+from numpy import where
 
 #############################################
 
@@ -17,10 +17,10 @@ def main():
     left = -1
     right = -1
 
-    try_left = image[middle_y][:middle_x].index(
-        max(image[middle_y][:middle_x]))
-    try_right = image[middle_y][middle_x:].index(
-        max(image[middle_y][middle_x:]))
+    try_left = where(image[middle_y][:middle_x] ==
+                     max(image[middle_y][:middle_x]))[0]
+    try_right = where(image[middle_y][middle_x:] ==
+                      max(image[middle_y][middle_x:]))[0]
     if image[middle_y][left] > 200:
         left = try_left
     if image[middle_y][middle_x+right] > 200:
