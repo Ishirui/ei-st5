@@ -10,7 +10,7 @@
 #define LEFT 0
 #define RIGHT 1
 
-#define infraredPin A0;
+#define infraredPin A0
 float volts = 0;
 int distance = 80; //cm
 
