@@ -20,6 +20,8 @@ class Order(Enum):
     READENCODERr = 7
     READENCODERl = 8
     RESETENC = 9
+    READIR = 10
+
 
 def read_order(f):
     """
@@ -27,6 +29,7 @@ def read_order(f):
     :return: (Order Enum Object)
     """
     return Order(read_i8(f))
+
 
 def read_i8(f):
     """
