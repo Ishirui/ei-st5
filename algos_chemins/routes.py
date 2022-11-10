@@ -1,5 +1,5 @@
 import numpy as np
-from salesman import itineraire, unprecise_index
+from .salesman import itineraire, unprecise_index
 
 def quadrillage(n):
     g = [[] for i in range(n**2)]
@@ -21,14 +21,11 @@ def deplacement_quadrillage(n, start, delivery_coords, before_start):
     g = quadrillage(n)
     d_c = [start[1]*n + start[0]] + [i[1]*n + i[0] for i in delivery_coords]
     it_sorties, pos_list = itineraire(g, d_c)
-    print(it_sorties, pos_list)
-    it_sorties[0] = (unprecise_index(g[pos_list[0]], pos_list[1]) - unprecise_index(g[pos_list[0]], n*before_start[1] + before_start[0]))%len(g[pos_list[0]])
     manoeuvres = []
     y = [i//n for i in pos_list] + [before_start[1]]
     x = [i%n for i in pos_list] + [before_start[0]]
     pos_counter = 0
     for i in it_sorties:
-        print(manoeuvres)
         if i == -1:
             manoeuvres.append('livraison')
         elif i == 0:

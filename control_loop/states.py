@@ -1,5 +1,7 @@
 import time
 from sys import exit
+from math import sinh
+
 
 class BaseState:
     def __init__(self, **kwargs):
@@ -23,13 +25,14 @@ class BaseState:
 
 
 class SuivreLigne(BaseState):
-    line_correction_gain = 10 ######################### Remplacer par le bon gain
+    outer_correction_gain = 1.5 ######################### Remplacer par le bon gain
+    inner_correction_gain = 2.5
     
     def during(self, **kwargs):
         v = kwargs['v']
         erreur_orientation = kwargs['erreur_orientation']
 
-        w = self.line_correction_gain * erreur_orientation/320
+        w = self.outer_correction_gain * sinh(self.inner_correction_gain/self.outer_correction_gain*erreur_orientation/160)
         consigne = (v,w)
         return consigne
 
@@ -86,7 +89,7 @@ class DemiTour(BaseState):
 
 
 class Intersection(BaseState):
-    center_time = 0.5 #################### A calibrer
+    center_time = 0.3 #################### A calibrer
 
     def __init__(self, **kwargs):
         self.start_time = time.time()
@@ -103,7 +106,7 @@ class Intersection(BaseState):
 
 class ChoixDirection(BaseState):
     turn_w = 1.6
-    turn_time = 0.3
+    turn_time = 0.8
 
     def __init__(self, **kwargs):
         self.start_time = time.time()
@@ -142,8 +145,7 @@ class ChoixDirection(BaseState):
         
         if time.time() - self.start_time > self.turn_time:
             if self.direction in ["droite", "gauche"] and abs(erreur_orientation) < 0.1 :
-                return SuivreLigne
-            return SuivreLigne()
+                return SuivreLigne()
 
 
 class SortieRoute(BaseState):
@@ -208,3 +210,4 @@ class Stop(BaseState):
     def transition_conditions(self, *args, **kwargs):
         if time.time() - self.start_time > self.stop_time:
             exit(0)
+            

@@ -6,7 +6,7 @@ import time
 from picamera import PiCamera
 from picamera.array import PiRGBArray
 
-camera = PiCamera()
+camera = PiCamera(sensor_mode = 2)
 camera.resolution = (640//4, 480//4)
 camera.framerate = 32
 rawCapture = PiRGBArray(camera, size=camera.resolution)
@@ -14,14 +14,13 @@ rawCapture = PiRGBArray(camera, size=camera.resolution)
 
 frame_source = camera.capture_continuous(rawCapture, format="bgr", use_video_port=True)
 
-def perception():
+def perception(feedback = False):
 
     # Input Image
     image = next(frame_source).array
-    #image=cv2.imread("test_photo.jpg")
-    image = cv2.flip(image, -1)
+    #image = cv2.flip(image, -1)
 
-    cv2.imshow("Image non traitée", image)
+    if feedback: cv2.imshow("Image non traitée", image)
 
     # Output initializing
     detectOut = 0
@@ -29,12 +28,12 @@ def perception():
     erreur_orientation = 0
 
     # Convert to HSV color space
-    blur = cv2.blur(image,(5,5))
+    blur = cv2.blur(image,(10,10))
     _, thresh1 = cv2.threshold(blur,168,255,cv2.THRESH_BINARY)
     hsv = cv2.cvtColor(thresh1, cv2.COLOR_RGB2HSV)
 
     # Define range of white color in HSV
-    lower_white = np.array([0, 0, 160])
+    lower_white = np.array([0, 0, 80])
     upper_white = np.array([172, 111, 255])
     
     # Threshold the HSV image
@@ -53,27 +52,6 @@ def perception():
     cv2.drawContours(img_contours, contours, -1, (255,0,0), -1)
     print("shapes",dilated_mask.shape,img_contours.shape)
 
-    kernel1 = np.array([[1, 1, 1],
-                    [0, 0, 0],
-                    [-1, -1, -1]])
-    
-    horizontal = cv2.filter2D(src=img_contours, ddepth=-1, kernel=kernel1)
-    print(horizontal.shape)
-    cv2.imshow("horizontal", horizontal)
-    cv2.waitKey(0)
-    n_horizontal = []
-
-    for row in horizontal.transpose():
-        maxi = max(row)
-        n_horizontal.append([maxi for _ in row])
-
-    horizontal = np.array(n_horizontal).transpose()
-    # Show extracted horizontal lines
-    cv2.imshow("n_horizontal", horizontal)
-    cv2.waitKey(0)
-
-
-
     if len(contours) > 0: # Si un blob est detectee
         M = cv2.moments(contours[0])
         cx = int(M['m10']/M['m00']) # Abscisse du centre du blob
@@ -82,29 +60,60 @@ def perception():
         detectOut = 1
 
 
-    # On cherche des "routes" sur 3 des 4 bords de la camera
+    # # On cherche des "routes" sur 3 des 4 bords de la camera
 
-    bord_gauche = img_contours[:,0].tolist()
-    bord_gauche.reverse()
-    bord_haut = img_contours[0,:].tolist()
-    bord_droit = np.transpose(img_contours[:,-1]).tolist()
+    # bord_gauche = img_contours[:,0].tolist()
+    # bord_gauche.reverse()
+    # bord_haut = img_contours[0,:].tolist()
+    # bord_droit = np.transpose(img_contours[:,-1]).tolist()
 
-    bord = bord_gauche + bord_haut + bord_droit
+    # bord = bord_gauche + bord_droit
 
-    roads_detected = 0
-    detecte = 0
-    for pix in bord:
-        if pix >= 200:
-            detecte = 1
-        if detecte == 1 and pix <= 50:
-            roads_detected += 1
-            detecte = 0
+    # roads_detected = 0
+    # detecte = 0
+    # for pix in bord:
+    #     if pix >= 200:
+    #         detecte = 1
+    #     if detecte == 1 and pix <= 50:
+    #         roads_detected += 1
+    #         detecte = 0
 
-    if roads_detected >= 2:
-        detect_inter = 1
+    # if roads_detected >= 1:
+    #     detect_inter = 1
     
 
-    cv2.imshow("Image traitée",img_contours)
+
+
+    # New version of intersection detection
+    
+    expected_corners = 3
+    blur = cv2.blur(image,(6,6))
+    _,thresh1 = cv2.threshold(blur,168,255,cv2.THRESH_BINARY)
+    hsv = cv2.cvtColor(thresh1, cv2.COLOR_RGB2HSV)
+
+    # Define range of white color in HSV
+    lower_white = np.array([0, 0, 168])
+    upper_white = np.array([172, 111, 255])
+    # Threshold the HSV image
+    mask = cv2.inRange(hsv, lower_white, upper_white)
+
+    kernel_erode = np.ones((6,6), np.uint8)
+    eroded_mask = cv2.erode(mask, kernel_erode, iterations=1)
+    kernel_dilate = np.ones((4,4), np.uint8)
+    dilated_mask = cv2.dilate(eroded_mask, kernel_dilate, iterations=1)
+    gray = np.float32(dilated_mask)
+
+    dst = cv2.cornerHarris(gray,5,3,0.10)
+    corners = cv2.goodFeaturesToTrack(gray, 5,0.5,20)
+    corners = np.int0(corners)
+
+    if len(corners) >= expected_corners:
+        detect_inter = 1
+
+
+
+
+    if feedback: cv2.imshow("Image traitée",img_contours)
     key = cv2.waitKey(1) & 0xFF
 
 
@@ -118,4 +127,4 @@ def perception():
 
 if __name__ == "__main__":
     while True:
-        perception()
+        perception(feedback = True)
