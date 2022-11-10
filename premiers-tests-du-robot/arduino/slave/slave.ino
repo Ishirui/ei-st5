@@ -232,7 +232,7 @@ void get_messages_from_serial()
       }
       case READIR:
       {
-        write_i16(MeasureDistanceIR);
+        write_i16(MeasureDistanceIR());
         break;
       }
 
