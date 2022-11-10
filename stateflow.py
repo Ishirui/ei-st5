@@ -10,11 +10,6 @@ v = 0.3 # Vitesse de consigne, en m.s^-1 - doit être compris entre ~0.15 et 0.4
 thresh_obs = 50 # Distance limite de detection d'obstacle en cm
 detect_obs_thresh = 5 #Nb de hits qu'il faut avant de lancer un arrêt d'urgence
 
-<<<<<<< HEAD
-mode = "8" # "8" ou "quad" pour 8 ou quadrillage
-quadrillage = (4, [0,0], [[3,3], [2,2], [0,3]], [0,1], [])
-=======
->>>>>>> 4859f8f052dbfd76a19693bfde5a5c9aa3e50135
 
 mode = "quad" # "8" ou "quad" pour 8 ou quadrillage
 N = 4 # Nombre de noeuds sur le cote du quadrillage
