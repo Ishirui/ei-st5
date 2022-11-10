@@ -26,8 +26,8 @@ class BaseState:
 
 
 class SuivreLigne(BaseState):
-    outer_correction_gain = 1.5 ######################### Remplacer par le bon gain
-    inner_correction_gain = 3
+    outer_correction_gain = 3 ######################### Remplacer par le bon gain
+    inner_correction_gain = 2.3
     intersection_cooldown_time = 2
     static_gain = 0.4
     
@@ -76,8 +76,8 @@ class ArretUrgence(BaseState):
 
 
 class DemiTour(BaseState):
-    turn_time = 1.7
-    turn_w = 2
+    turn_time = 1.85
+    turn_w = 1.7
 
     def __init__(self, **kwargs):
         self.start_time = time.time()
@@ -93,7 +93,7 @@ class DemiTour(BaseState):
 
 class Intersection(BaseState):
     # center_time = 0.3 #################### A calibrer
-    center_time = 0.95
+    center_time = 0.5
     cooldown_time = 2
 
 
@@ -188,7 +188,7 @@ class SortieRoute(BaseState):
 
 
 class DemiTourSR(BaseState):
-    turn_time_SR = 2
+    turn_time_SR = 1.85
     turn_w_SR = 1.7
 
     def __init__(self, **kwargs):
