@@ -47,15 +47,16 @@ def perception():
     dilated_mask = cv2.dilate(eroded_mask, kernel_dilate, iterations=1)
 
     # Find the different contours
-    contours, _ = cv2.findContours(dilated_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    im2,contours, _ = cv2.findContours(dilated_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     img_contours = np.zeros(dilated_mask.shape)
     contours = sorted(contours, key=cv2.contourArea, reverse=True)[:1] # Sort by area (keep only the biggest one)
     cv2.drawContours(img_contours, contours, -1, (255,0,0), -1)
-    print("shapes",dilated_mask.shape,img_contours.shape)
+    print("img_contours",np.max(img_contours))
+    #print("shapes",dilated_mask.shape,img_contours.shape)
 
-    kernel1 = np.array([[1, 1, 1],
+    kernel1 = np.array([[1/9, 1/9, 1/9],
                     [0, 0, 0],
-                    [-1, -1, -1]])
+                    [-1/9, -1/9, -1/9]])
     
     horizontal = cv2.filter2D(src=img_contours, ddepth=-1, kernel=kernel1)
     print(horizontal.shape)
@@ -68,6 +69,9 @@ def perception():
         n_horizontal.append([maxi for _ in row])
 
     horizontal = np.array(n_horizontal).transpose()
+    print("hori",np.max(horizontal))
+    brightness=np.sum(horizontal)/(horizontal.shape[0]*horizontal.shape[1]*255)
+    print("b",brightness)
     # Show extracted horizontal lines
     cv2.imshow("n_horizontal", horizontal)
     cv2.waitKey(0)
@@ -107,9 +111,17 @@ def perception():
     cv2.imshow("Image traitée",img_contours)
     key = cv2.waitKey(1) & 0xFF
 
+    if len(contours) > 0: # Si un blob est detectee
+        M = cv2.moments(contours[0])
+        cx = int(M['m10']/M['m00']) # Abscisse du centre du blob
+        erreur_orientation = image.shape[0]/2 - cx
+    else:
+        detectOut = 1
 
+    if brightness>=0.1:
+        detect_inter=1
     # Clear the stream in preparation for the next frame
-    rawCapture.truncate(0)
+    #rawCapture.truncate(0)
 
     return (erreur_orientation,detect_inter,detectOut)
 
