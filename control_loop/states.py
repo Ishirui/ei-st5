@@ -1,4 +1,5 @@
 import time
+from sys import exit
 
 class BaseState:
     def __init__(self, **kwargs):
@@ -109,19 +110,34 @@ class ChoixDirection(BaseState):
 
     def entry(self, **kwargs):
         instructions = kwargs['instructions']
-        self.direction = next(instructions)
+        v = kwargs["v"]
+        try:
+            self.direction = next(instructions)
+        except StopIteration:
+            print("Fin du chemin !")
+            self.direction = "STOP"
+
+        if self.direction == 'gauche':
+            self.consigne = (0,self.turn_w) 
+        elif self.direction == 'droite':
+            self.consigne = (0,-self.turn_w) ################## Potentiellement, changer de signes
+        elif self.direction == "milieu":
+            self.consigne = (v, 0)
+        elif self.direction == "demi-tour":
+            self.turn_time = 2*self.turn_time
+            self.consigne = (0,self.turn_w)
+        elif self.direction == "livraison":
+            self.consigne = (0,0)
+        else:
+            self.consigne = (0,0)
 
     def during(self, **kwargs):
-
-        if self.direction == 'G':
-            consigne = (0,self.turn_w) 
-        if self.direction == 'D':
-            consigne = (0,-self.turn_w) ################## Potentiellement, changer de signes
-        else:
-            consigne = (0,0)
-        return consigne
+        return self.consigne
 
     def transition_conditions(self, *args, **kwargs):
+        if self.direction == "STOP":
+            return Stop()
+        
         if time.time() - self.start_time > self.turn_time:
             return SuivreLigne()
 
@@ -174,3 +190,17 @@ class ChercheRoute(BaseState):
         
         if detect_out == 0:
             return SuivreLigne()
+
+class Stop(BaseState):
+    stop_time = 1
+    
+    def __init__(self, **kwargs):
+        self.start_time = time.time()
+    
+    def during(self, **kwargs):
+        consigne = (0,self.turn_w_SR)
+        return consigne
+
+    def transition_conditions(self, *args, **kwargs):
+        if time.time() - self.start_time > self.stop_time:
+            exit(0)

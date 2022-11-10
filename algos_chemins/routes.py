@@ -1,5 +1,5 @@
 import numpy as np
-from salesman import itineraire
+from .salesman import itineraire
 
 def quadrillage(n):
     g = [[] for i in range(n**2)]
@@ -138,7 +138,9 @@ def deplacement_quadrillage(n, start, delivery_coords, before_start):
     return(manoeuvres)
 
 
-print(deplacement_quadrillage(5, [1,0], [[3,3], [2,2], [0,3]], [0,0]))
+
+if __name__ == "__main__":
+    print(deplacement_quadrillage(4, [0,0], [[3,3], [2,2], [0,3]]))
 
 
                     
