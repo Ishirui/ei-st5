@@ -1,4 +1,5 @@
 from robust_serial import write_order, read_i16
+from envoi_commande_arduino import serial_file
 
 def distance_capteur():
     write_order(serial_file, Order.READIR)

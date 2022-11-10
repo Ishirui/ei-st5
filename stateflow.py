@@ -2,7 +2,7 @@ from control_loop.perception import perception
 from control_loop.states import *
 from comm_ard.envoi_commande_arduino import transmit
 from algos_chemins.routes import deplacement_quadrillage, quadrillage
-from control_loop.obstacle import distance_capteur
+from comm_ard.obstacle import distance_capteur
 
 ## GLOBAL VARIABLES
 v = 0.2 # Vitesse de consigne, en m.s^-1 - doit être compris entre ~0.15 et 0.45
