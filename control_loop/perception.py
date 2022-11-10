@@ -60,27 +60,59 @@ def perception():
         detectOut = 1
 
 
-    # On cherche des "routes" sur 3 des 4 bords de la camera
+    # # On cherche des "routes" sur 3 des 4 bords de la camera
 
-    bord_gauche = img_contours[:,0].tolist()
-    bord_gauche.reverse()
-    bord_haut = img_contours[0,:].tolist()
-    bord_droit = np.transpose(img_contours[:,-1]).tolist()
+    # bord_gauche = img_contours[:,0].tolist()
+    # bord_gauche.reverse()
+    # bord_haut = img_contours[0,:].tolist()
+    # bord_droit = np.transpose(img_contours[:,-1]).tolist()
 
-    bord = bord_gauche + bord_droit
+    # bord = bord_gauche + bord_droit
 
-    roads_detected = 0
-    detecte = 0
-    for pix in bord:
-        if pix >= 200:
-            detecte = 1
-        if detecte == 1 and pix <= 50:
-            roads_detected += 1
-            detecte = 0
+    # roads_detected = 0
+    # detecte = 0
+    # for pix in bord:
+    #     if pix >= 200:
+    #         detecte = 1
+    #     if detecte == 1 and pix <= 50:
+    #         roads_detected += 1
+    #         detecte = 0
 
-    if roads_detected >= 1:
-        detect_inter = 1
+    # if roads_detected >= 1:
+    #     detect_inter = 1
     
+
+
+
+    # New version of intersection detection
+    
+    expected_corners = 3
+    blur = cv2.blur(image,(6,6))
+    _,thresh1 = cv2.threshold(blur,168,255,cv2.THRESH_BINARY)
+    hsv = cv2.cvtColor(thresh1, cv2.COLOR_RGB2HSV)
+
+    # Define range of white color in HSV
+    lower_white = np.array([0, 0, 168])
+    upper_white = np.array([172, 111, 255])
+    # Threshold the HSV image
+    mask = cv2.inRange(hsv, lower_white, upper_white)
+
+    kernel_erode = np.ones((6,6), np.uint8)
+    eroded_mask = cv2.erode(mask, kernel_erode, iterations=1)
+    kernel_dilate = np.ones((4,4), np.uint8)
+    dilated_mask = cv2.dilate(eroded_mask, kernel_dilate, iterations=1)
+    gray = np.float32(dilated_mask)
+
+    dst = cv2.cornerHarris(gray,5,3,0.10)
+    corners = cv2.goodFeaturesToTrack(gray, 5,0.5,20)
+    corners = np.int0(corners)
+
+    if len(corners) >= expected_corners:
+        detect_inter = 1
+
+
+
+
 
     cv2.imshow("Image traitée",img_contours)
     key = cv2.waitKey(1) & 0xFF
