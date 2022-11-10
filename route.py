@@ -27,7 +27,10 @@ def main():
         right = try_right
     if left != -1 and right != -1:
         middle = (left + right)/2
-    transmit(0.15, (middle_x - middle)/camera.resolution[0] * rot)
+    if abs(middle_x-middle) > 25:
+        transmit(0.15, (middle_x - middle)/camera.resolution[0] * rot)
+    else:
+        transmit(0.15, 0)
 
 
 if __name__ == '__main__':
