@@ -62,7 +62,7 @@ for i=0:(M-1)
 end
 
 %ajouter vehicules
-Nb_car=3;      %nbre de voiture
+Nb_car=1;      %nbre de voiture
 for i=1:Nb_car
     car(i) = vehicle(scenario, 'ClassID', 1, 'Position', [0 0 0]);
     speed(i)=2;  %vitesse
