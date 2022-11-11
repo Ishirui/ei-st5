@@ -21,7 +21,7 @@ def perception():
     #image=cv2.imread("test_photo.jpg")
     image = cv2.flip(image, -1)
 
-    cv2.imshow("Image non traitée", image)
+    #cv2.imshow("Image non traitée", image)
 
     # Output initializing
     detectOut = 0
@@ -51,7 +51,7 @@ def perception():
     img_contours = np.zeros(dilated_mask.shape)
     contours = sorted(contours, key=cv2.contourArea, reverse=True)[:1] # Sort by area (keep only the biggest one)
     cv2.drawContours(img_contours, contours, -1, (255,0,0), -1)
-    print("img_contours",np.max(img_contours))
+    #print("img_contours",np.max(img_contours))
     #print("shapes",dilated_mask.shape,img_contours.shape)
 
     kernel1 = np.array([[1/9, 1/9, 1/9],
@@ -59,22 +59,16 @@ def perception():
                     [-1/9, -1/9, -1/9]])
     
     horizontal = cv2.filter2D(src=img_contours, ddepth=-1, kernel=kernel1)
-    print(horizontal.shape)
-    cv2.imshow("horizontal", horizontal)
-    cv2.waitKey(0)
-    n_horizontal = []
+    #print(horizontal.shape)
+    #cv2.imshow("horizontal", horizontal)
+    #cv2.waitKey(0)
+    ligne=horizontal.max(0)
 
-    for row in horizontal.transpose():
-        maxi = max(row)
-        n_horizontal.append([maxi for _ in row])
-
-    horizontal = np.array(n_horizontal).transpose()
-    print("hori",np.max(horizontal))
-    brightness=np.sum(horizontal)/(horizontal.shape[0]*horizontal.shape[1]*255)
+    brightness=np.sum(horizontal)/(horizontal.shape[0]*255)
     print("b",brightness)
     # Show extracted horizontal lines
-    cv2.imshow("n_horizontal", horizontal)
-    cv2.waitKey(0)
+    #cv2.imshow("n_horizontal", horizontal)
+    #cv2.waitKey(0)
 
 
 
@@ -88,28 +82,10 @@ def perception():
 
     # On cherche des "routes" sur 3 des 4 bords de la camera
 
-    bord_gauche = img_contours[:,0].tolist()
-    bord_gauche.reverse()
-    bord_haut = img_contours[0,:].tolist()
-    bord_droit = np.transpose(img_contours[:,-1]).tolist()
-
-    bord = bord_gauche + bord_haut + bord_droit
-
-    roads_detected = 0
-    detecte = 0
-    for pix in bord:
-        if pix >= 200:
-            detecte = 1
-        if detecte == 1 and pix <= 50:
-            roads_detected += 1
-            detecte = 0
-
-    if roads_detected >= 2:
-        detect_inter = 1
     
 
     cv2.imshow("Image traitée",img_contours)
-    key = cv2.waitKey(1) & 0xFF
+    #key = cv2.waitKey(1) & 0xFF
 
     if len(contours) > 0: # Si un blob est detectee
         M = cv2.moments(contours[0])
@@ -121,7 +97,7 @@ def perception():
     if brightness>=0.1:
         detect_inter=1
     # Clear the stream in preparation for the next frame
-    #rawCapture.truncate(0)
+    rawCapture.truncate(0)
 
     return (erreur_orientation,detect_inter,detectOut)
 

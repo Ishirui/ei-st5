@@ -59,7 +59,6 @@ class ArretUrgence(BaseState):
         self.start_time = time.time()
     
     def entry(self, **kwargs):
-        # Ajouter l'obstacle / update les poids de la map
         pass
 
     def during(self, **kwargs):
@@ -67,8 +66,16 @@ class ArretUrgence(BaseState):
         return consigne
 
     def exit(self, **kwargs):
-        # Recalculer l'itineraire
-        pass
+        positions = kwargs['positions']
+        arretes_cassees = kwargs['arretes_cassees']
+        avancement = kwargs['avancement']
+        mode = kwargs['mode']
+
+        if mode == 'quad':
+            point_depart = positions[avancement-1]
+            pre_depart = positions[avancement]
+            arretes_cassees.append([[pre_depart,point_depart], [point_depart,pre_depart]])
+            return (point_depart, pre_depart, arretes_cassees)
 
     def transition_conditions(self, *args, **kwargs):
         if time.time() - self.start_time > self.stop_time:
@@ -101,6 +108,9 @@ class Intersection(BaseState):
         self.start_time = time.time()
 
     def entry(self, **kwargs):
+        return True
+
+        # Delai min entre 2 intersection
         global last_inter_time
         last_inter_time = self.start_time
         v = kwargs["v"]
@@ -127,6 +137,8 @@ class ChoixDirection(BaseState):
 
     def entry(self, **kwargs):
         instructions = kwargs['instructions']
+        liste_livraison_ordonnee = kwargs['liste_livraison_ordonnee']
+
         v = kwargs["v"]
         try:
             self.direction = next(instructions)
@@ -145,6 +157,7 @@ class ChoixDirection(BaseState):
             self.consigne = (0,self.turn_w)
         elif self.direction == "livraison":
             self.consigne = (0,0)
+            liste_livraison_ordonnee.pop(0)
         else:
             self.consigne = (0,0)
 

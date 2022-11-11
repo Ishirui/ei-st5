@@ -12,8 +12,15 @@ detect_obs_thresh = 5 #Nb de hits qu'il faut avant de lancer un arrêt d'urgence
 
 
 mode = "quad" # "8" ou "quad" pour 8 ou quadrillage
-quadrillage = (4, [0,0], [[3,3], [2,2], [0,3]], [0,1])
-
+N = 4 # Nombre de noeuds sur le cote du quadrillage
+point_depart = [0,0]
+livraisons = [[3,3], [2,2], [0,3]]
+pre_depart = [0,1]
+arretes_cassees = []
+quadrillage = (N, point_depart, livraisons, pre_depart, arretes_cassees)
+#[manoeuvre,position,liste_livraison_ordonnee]
+#deplacement_quadrillage(n,point_depart,points_livraison,orientation,arretes_cassees)
+avancement = 0 # avancement dans la liste position -> il va vers position[avancement]
 erreur_orientation = 0
 detect_obs_count = 0
 
@@ -32,8 +39,9 @@ if mode == "8":
             yield "milieu"
     instructions = generator()
 else:
-    instructions = (x for x in deplacement_quadrillage(*quadrillage))
-    print(deplacement_quadrillage(*quadrillage))
+    instruction_liste,positions,liste_livraison_ordonnee = deplacement_quadrillage(*quadrillage)
+    instructions = (x for x in instruction_liste)
+    print(instruction_liste)
 
 
 
@@ -46,6 +54,10 @@ def main():
     global detect_inter
     global detect_out
     global detect_obs_count
+    global avancement
+    global liste_livraison_ordonnee
+    global positions
+
     while True:
 
         try:
@@ -70,13 +82,19 @@ def main():
         if new_state != curr_state:
         
 
-            new_instr = curr_state.exit()
-            if new_instr:
-                instructions = new_instr
-        
+            recalcul = curr_state.exit(mode = mode, arretes_cassees = arretes_cassees, avancement = avancement, positions = positions)
+            if bool(recalcul):
+                print('Recalcul en cours...')
+                point_depart, pre_depart, arretes_cassees = recalcul
+                quadrillage = (N, point_depart, liste_livraison_ordonnee, pre_depart, arretes_cassees)
+                instruction_liste, positions, liste_livraison_ordonnee = deplacement_quadrillage(*quadrillage)
+                instructions = (x for x in instruction_liste)
+                print('Nouvelles instructions : ', instruction_liste)
+    
             curr_state = new_state
 
-            curr_state.entry(v=v, instructions = instructions)
+            if curr_state.entry(v = v, instructions = instructions, liste_livraison_ordonnee = liste_livraison_ordonnee)
+                avancement = avancement + 1 # entry renvoit True uniquement lorsque le nouvel etat est une intersection
 
             print(curr_state)
 
