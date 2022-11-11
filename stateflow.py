@@ -1,7 +1,7 @@
 from control_loop.perception import perception
 from control_loop.states import *
 from comm_ard.envoi_commande_arduino import transmit
-from algos_chemins.routes import deplacement_quadrillage, quadrillage
+from algos_chemins.algo_chemins import generate_movements, quadrillage
 from comm_ard.obstacle import distance_capteur
 import time
 
@@ -10,16 +10,14 @@ v = 0.5 # Vitesse de consigne, en m.s^-1 - doit être compris entre ~0.15 et 0.4
 thresh_obs = 50 # Distance limite de detection d'obstacle en cm
 detect_obs_thresh = 5 #Nb de hits qu'il faut avant de lancer un arrêt d'urgence
 
-
 mode = "8" # "8" ou "quad" pour 8 ou quadrillage
 N = 4 # Nombre de noeuds sur le cote du quadrillage
-point_depart = [0,0]
-livraisons = [[3,3], [2,2], [0,3]]
-pre_depart = [0,1]
-arretes_cassees = []
-quadrillage = (N, point_depart, livraisons, pre_depart, arretes_cassees)
+point_depart = (0,0)
+livraisons = [(3,3), (2,2), (0,3)]
+curr_card = 'n'
+aretes_cassees = []
 #[manoeuvre,position,liste_livraison_ordonnee]
-#deplacement_quadrillage(n,point_depart,points_livraison,orientation,arretes_cassees)
+#generate_movements(n,point_depart,points_livraison,orientation,aretes_cassees)
 avancement = 0 # avancement dans la liste position -> il va vers position[avancement]
 erreur_orientation = 0
 detect_obs_count = 0
@@ -39,7 +37,7 @@ if mode == "8":
             yield "milieu"
     instructions = generator()
 else:
-    instruction_liste,positions,liste_livraison_ordonnee = deplacement_quadrillage(*quadrillage)
+    instruction_liste, positions,liste_livraison_ordonnee = generate_movements(N, point_depart, curr_card, livraisons, aretes_cassees)
     instructions = (x for x in instruction_liste)
     print(instruction_liste)
 
@@ -57,7 +55,8 @@ def main():
     global avancement
     global liste_livraison_ordonnee
     global positions
-    global arretes_cassees
+    global aretes_cassees
+    global curr_card
 
     while True:
 
@@ -75,8 +74,8 @@ def main():
                 detect_obs = True
                 detect_obs_count = 0
         except Exception as e:
-            print("Erreur de perception:"+str(e))
-            erreur_orientation, detect_inter, detect_out = 0,0,0
+            print("Erreur de perception:" + str(e))
+            erreur_orientation, detect_inter, detect_out = 0, 0, 0
 
         if mode == "8": #TODO: Virer ça quand on sera sur l'environnement de test réel
             detect_inter = 0
@@ -86,12 +85,15 @@ def main():
         if new_state != curr_state:
         
 
-            recalcul = curr_state.exit(mode = mode, arretes_cassees = arretes_cassees, avancement = avancement, positions = positions)
-            if bool(recalcul):
+            exit_res = curr_state.exit(mode = mode, aretes_cassees = aretes_cassees, avancement = avancement, positions = positions, curr_card = curr_card)
+
+            if type(exit_res) == str:
+                curr_card = exit_res
+            elif exit_res:
                 print('Recalcul en cours...')
-                point_depart, pre_depart, arretes_cassees = recalcul
-                quadrillage = (N, point_depart, liste_livraison_ordonnee, pre_depart, arretes_cassees)
-                instruction_liste, positions, liste_livraison_ordonnee = deplacement_quadrillage(*quadrillage)
+                point_depart, aretes_cassees = exit_res
+                curr_card = virage[curr_card]['b']
+                instruction_liste, positions, liste_livraison_ordonnee = generate_movements(N, point_depart, curr_card, livraisons, aretes_cassees)
                 instructions = (x for x in instruction_liste)
                 print('Nouvelles instructions : ', instruction_liste)
     

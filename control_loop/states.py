@@ -2,6 +2,11 @@ import time
 from sys import exit
 from math import sinh
 
+virage = {'n': {'g':'w', 'd':'e', 'f':'n', 'b':'s'},\
+          's': {'g':'e', 'd':'w', 'f':'s', 'b':'n'},\
+          'e': {'g':'n', 'd':'s', 'f':'e', 'b':'w'},\
+          'w': {'g':'s', 'd':'n', 'f':'w', 'b':'e'}}
+
 last_inter_time = 0
 
 class BaseState:
@@ -75,7 +80,7 @@ class ArretUrgence(BaseState):
             point_depart = positions[avancement-1]
             pre_depart = positions[avancement]
             arretes_cassees.append([[pre_depart,point_depart], [point_depart,pre_depart]])
-            return (point_depart, pre_depart, arretes_cassees)
+            return (point_depart, arretes_cassees)
 
     def transition_conditions(self, *args, **kwargs):
         if time.time() - self.start_time > self.stop_time:
@@ -108,13 +113,14 @@ class Intersection(BaseState):
         self.start_time = time.time()
 
     def entry(self, **kwargs):
-        return True
 
         # Delai min entre 2 intersection
         global last_inter_time
         last_inter_time = self.start_time
         v = kwargs["v"]
         self.center_time = self.center_time*0.2/v
+
+        return True
 
 
     def during(self, **kwargs):
@@ -125,6 +131,8 @@ class Intersection(BaseState):
     def transition_conditions(self, *args, **kwargs):
         if time.time() - self.start_time > self.center_time:
             return ChoixDirection()
+    
+
         
 
 class ChoixDirection(BaseState):
@@ -163,6 +171,10 @@ class ChoixDirection(BaseState):
 
     def during(self, **kwargs):
         return self.consigne
+
+    def exit(self, **kwargs):
+        curr_card = kwargs['curr_card']
+        return virage[curr_card][self.direction]
 
     def transition_conditions(self, *args, **kwargs):
         erreur_orientation = kwargs['erreur_orientation']
