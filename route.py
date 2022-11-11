@@ -16,7 +16,7 @@ def main():
 
     left = -1
     right = -1
-    middle = middle
+    middle = middle_x
 
     index = -1
 
