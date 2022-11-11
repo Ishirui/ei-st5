@@ -66,6 +66,8 @@ def unprecise_index(l, x):
     for i in range(len(l)):
         if l[i][0] == x:
             return i
+    return 0
+    
     
 
 
