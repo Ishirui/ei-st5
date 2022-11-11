@@ -1,5 +1,5 @@
 import numpy as np
-from .salesman import itineraire, unprecise_index
+from salesman import itineraire, unprecise_index
 
 def quadrillage(n, aretes_cassees):
     g = [[] for i in range(n**2)]
@@ -23,10 +23,11 @@ def quadrillage(n, aretes_cassees):
 
 def deplacement_quadrillage(n, start, delivery_coords, before_start, aretes_cassees):
     g = quadrillage(n, aretes_cassees)
-    print(g[n*aretes_cassees[0][0][1] + n*aretes_cassees[0][0][0]])
+    #print(g[n*aretes_cassees[0][0][1] + n*aretes_cassees[0][0][0]])
     d_c = [start[1]*n + start[0]] + [i[1]*n + i[0] for i in delivery_coords]
     it_sorties, pos_list = itineraire(g, d_c)
     manoeuvres = []
+    it_sorties[0] = (unprecise_index(g[pos_list[0]], pos_list[1]) - unprecise_index(g[pos_list[0]], n*before_start[1] + before_start[0]))%len(g[pos_list[0]])
     y = [i//n for i in pos_list] + [before_start[1]]
     x = [i%n for i in pos_list] + [before_start[0]]
     pos_counter = 0
@@ -178,7 +179,7 @@ def deplacement_quadrillage(n, start, delivery_coords, before_start, aretes_cass
 
 
 if __name__ == "__main__":
-    print(deplacement_quadrillage(4, [0,0], [[3,3], [2,2], [0,3]], [0,1], [[[0, 3], [0, 2]], [[0,2], [0, 3]], [[3, 3], [2, 3]], [[2, 3], [3, 3]]]))
+    print(deplacement_quadrillage(4, [0,0], [[3,3], [2,2], [0,3]], [0,1], []))
 
 """[[[0, 2], [0, 1]], [[0,2], [0, 3]]]"""
                     
