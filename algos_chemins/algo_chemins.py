@@ -115,6 +115,10 @@ def get_cardinals(n, node_paths):
             old_x, old_y = convert_node_to_coords(n, prev_node)
             new_x,new_y = convert_node_to_coords(n, node)
 
+            cardinal_dir = None
+
+            print(old_x, new_x, old_y, new_y)
+
             if new_x-old_x == 1:
                 cardinal_dir = "e"
             elif new_x-old_x == -1:
@@ -160,10 +164,10 @@ def add_stops(movements):
 def generate_movements(n, start_pos, start_card, delivery_coords, aretes_cassees):
     aretes_cassees = aretes_cassees + [(y,x) for (x,y) in aretes_cassees]
     g = quadrillage(n, aretes_cassees)
-    d_c = [convert_coords_to_node(n, start_pos)] + [convert_coords_to_node(n, coords) for coords in delivery_coords]
+    d_c = [convert_coords_to_node(n, coords) for coords in delivery_coords] + [convert_coords_to_node(n, start_pos)]
     it_sorties = get_paths_between_nodes(g, d_c)
 
-    node_coords_to_follow = add_stops([[convert_node_to_coords(node) for node in delivery] for delivery in it_sorties])
+    node_coords_to_follow = add_stops([[convert_node_to_coords(n, node) for node in delivery] for delivery in it_sorties])
 
     ordered_deliveries = sorted(delivery_coords, key=lambda x: node_coords_to_follow.index(x))
 

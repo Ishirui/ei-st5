@@ -2,10 +2,10 @@ import time
 from sys import exit
 from math import sinh
 
-virage = {'n': {'g':'w', 'd':'e', 'f':'n', 'b':'s'},\
-          's': {'g':'e', 'd':'w', 'f':'s', 'b':'n'},\
-          'e': {'g':'n', 'd':'s', 'f':'e', 'b':'w'},\
-          'w': {'g':'s', 'd':'n', 'f':'w', 'b':'e'}}
+virage = {'n': {'g':'w', 'd':'e', 'f':'n', 'b':'s', 'stop':'n'},\
+          's': {'g':'e', 'd':'w', 'f':'s', 'b':'n', 'stop':'s'},\
+          'e': {'g':'n', 'd':'s', 'f':'e', 'b':'w', 'stop':'e'},\
+          'w': {'g':'s', 'd':'n', 'f':'w', 'b':'e', 'stop':'w'}}
 
 last_inter_time = 0
 
@@ -72,15 +72,15 @@ class ArretUrgence(BaseState):
 
     def exit(self, **kwargs):
         positions = kwargs['positions']
-        arretes_cassees = kwargs['arretes_cassees']
+        aretes_cassees = kwargs['aretes_cassees']
         avancement = kwargs['avancement']
         mode = kwargs['mode']
 
         if mode == 'quad':
             point_depart = positions[avancement-1]
             pre_depart = positions[avancement]
-            arretes_cassees.append([[pre_depart,point_depart], [point_depart,pre_depart]])
-            return (point_depart, arretes_cassees)
+            aretes_cassees.append((pre_depart,point_depart))
+            return (point_depart, aretes_cassees)
 
     def transition_conditions(self, *args, **kwargs):
         if time.time() - self.start_time > self.stop_time:
@@ -88,7 +88,7 @@ class ArretUrgence(BaseState):
 
 
 class DemiTour(BaseState):
-    turn_time = 1.85
+    turn_time = 4
     turn_w = 1.7
 
     def __init__(self, **kwargs):
@@ -105,7 +105,7 @@ class DemiTour(BaseState):
 
 class Intersection(BaseState):
     # center_time = 0.3 #################### A calibrer
-    center_time = 0.5
+    center_time = 1.85
     cooldown_time = 2
 
 
@@ -131,13 +131,11 @@ class Intersection(BaseState):
     def transition_conditions(self, *args, **kwargs):
         if time.time() - self.start_time > self.center_time:
             return ChoixDirection()
-    
-
         
 
 class ChoixDirection(BaseState):
     turn_w = 1.6
-    turn_time = 0.9
+    turn_time = 2.2
     deliver_time = 1.5
 
     def __init__(self, **kwargs):
@@ -152,18 +150,18 @@ class ChoixDirection(BaseState):
             self.direction = next(instructions)
         except StopIteration:
             print("Fin du chemin !")
-            self.direction = "STOP"
+            self.direction = "FIN"
 
-        if self.direction == 'gauche':
+        if self.direction == 'g':
             self.consigne = (0,self.turn_w) 
-        elif self.direction == 'droite':
+        elif self.direction == 'd':
             self.consigne = (0,-self.turn_w) ################## Potentiellement, changer de signes
-        elif self.direction == "milieu":
+        elif self.direction == 'f':
             self.consigne = (v, 0)
-        elif self.direction == "demi-tour":
+        elif self.direction == "b":
             self.turn_time = 2*self.turn_time
             self.consigne = (0,self.turn_w)
-        elif self.direction == "livraison":
+        elif self.direction == "stop":
             self.consigne = (0,0)
             liste_livraison_ordonnee.pop(0)
         else:
@@ -179,13 +177,13 @@ class ChoixDirection(BaseState):
     def transition_conditions(self, *args, **kwargs):
         erreur_orientation = kwargs['erreur_orientation']
         
-        if self.direction == "STOP":
+        if self.direction == "FIN":
             return Stop()
         
-        if self.direction == "milieu":
+        if self.direction == "f":
             return SuivreLigne()
 
-        if self.direction == "livraison":
+        if self.direction == "stop":
             if time.time() - self.start_time > self.deliver_time:
                 return ChoixDirection()
         else:
@@ -213,7 +211,7 @@ class SortieRoute(BaseState):
 
 
 class DemiTourSR(BaseState):
-    turn_time_SR = 1.85
+    turn_time_SR = 4
     turn_w_SR = 1.7
 
     def __init__(self, **kwargs):

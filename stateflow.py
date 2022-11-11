@@ -1,20 +1,22 @@
 from control_loop.perception import perception
 from control_loop.states import *
 from comm_ard.envoi_commande_arduino import transmit
-from algos_chemins.algo_chemins import generate_movements, quadrillage
+from algos_chemins.algo_chemins import generate_movements
 from comm_ard.obstacle import distance_capteur
 import time
+import traceback
 
 ## GLOBAL VARIABLES
 v = 0.5 # Vitesse de consigne, en m.s^-1 - doit être compris entre ~0.15 et 0.45
-thresh_obs = 50 # Distance limite de detection d'obstacle en cm
+thresh_obs = 30 # Distance limite de detection d'obstacle en cm
 detect_obs_thresh = 5 #Nb de hits qu'il faut avant de lancer un arrêt d'urgence
 
-mode = "8" # "8" ou "quad" pour 8 ou quadrillage
+mode = "quad" # "8" ou "quad" pour 8 ou quadrillage
 N = 4 # Nombre de noeuds sur le cote du quadrillage
-point_depart = (0,0)
-livraisons = [(3,3), (2,2), (0,3)]
-curr_card = 'n'
+#point_depart_abs = (0,0)
+point_depart = (3,3)
+livraisons = [(2,2), (0,3)]
+curr_card = 's'
 aretes_cassees = []
 #[manoeuvre,position,liste_livraison_ordonnee]
 #generate_movements(n,point_depart,points_livraison,orientation,aretes_cassees)
@@ -30,6 +32,8 @@ detect_out = 0
 curr_state = SuivreLigne()
 
 consigne = (0,0)
+instruction_liste, positions, liste_livraison_ordonnee = [], [], []
+
 
 if mode == "8":
     def generator():
@@ -93,7 +97,7 @@ def main():
                 print('Recalcul en cours...')
                 point_depart, aretes_cassees = exit_res
                 curr_card = virage[curr_card]['b']
-                instruction_liste, positions, liste_livraison_ordonnee = generate_movements(N, point_depart, curr_card, livraisons, aretes_cassees)
+                instruction_liste, positions, liste_livraison_ordonnee = generate_movements(N, point_depart, curr_card, liste_livraison_ordonnee, aretes_cassees)
                 instructions = (x for x in instruction_liste)
                 print('Nouvelles instructions : ', instruction_liste)
     
@@ -103,6 +107,7 @@ def main():
                 avancement = avancement + 1 # entry renvoit True uniquement lorsque le nouvel etat est une intersection
 
             print(curr_state)
+            print(liste_livraison_ordonnee)
 
         consigne = curr_state.during(v = v, erreur_orientation = erreur_orientation)
 
@@ -122,6 +127,8 @@ def failsafe(start):
 if __name__ == "__main__":
     try:
         main()
+    except Exception as e:
+        traceback.print_exc()
     finally:
         print("Exiting...")
         consigne = (0,0)
