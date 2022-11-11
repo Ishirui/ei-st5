@@ -1,5 +1,8 @@
 import time
 from sys import exit
+from math import sinh
+
+last_inter_time = 0
 
 class BaseState:
     def __init__(self, **kwargs):
@@ -23,13 +26,16 @@ class BaseState:
 
 
 class SuivreLigne(BaseState):
-    line_correction_gain = 10 ######################### Remplacer par le bon gain
+    outer_correction_gain = 3 ######################### Remplacer par le bon gain
+    inner_correction_gain = 2.3
+    intersection_cooldown_time = 2
+    static_gain = 0.4
     
     def during(self, **kwargs):
         v = kwargs['v']
         erreur_orientation = kwargs['erreur_orientation']
 
-        w = self.line_correction_gain * erreur_orientation/320
+        w = self.outer_correction_gain * sinh((self.inner_correction_gain*v/0.2)/self.outer_correction_gain*erreur_orientation/160) + self.static_gain
         consigne = (v,w)
         return consigne
 
@@ -40,7 +46,7 @@ class SuivreLigne(BaseState):
         
         if detect_obs == 1:
             return ArretUrgence()
-        elif detect_inter == 1:
+        elif detect_inter == 1 and time.time() - last_inter_time > 2:
             return Intersection()
         elif detect_out == 1:
             return SortieRoute()
@@ -53,7 +59,6 @@ class ArretUrgence(BaseState):
         self.start_time = time.time()
     
     def entry(self, **kwargs):
-        # Ajouter l'obstacle / update les poids de la map
         pass
 
     def during(self, **kwargs):
@@ -61,8 +66,16 @@ class ArretUrgence(BaseState):
         return consigne
 
     def exit(self, **kwargs):
-        # Recalculer l'itineraire
-        pass
+        positions = kwargs['positions']
+        arretes_cassees = kwargs['arretes_cassees']
+        avancement = kwargs['avancement']
+        mode = kwargs['mode']
+
+        if mode == 'quad':
+            point_depart = positions[avancement-1]
+            pre_depart = positions[avancement]
+            arretes_cassees.append([[pre_depart,point_depart], [point_depart,pre_depart]])
+            return (point_depart, pre_depart, arretes_cassees)
 
     def transition_conditions(self, *args, **kwargs):
         if time.time() - self.start_time > self.stop_time:
@@ -70,8 +83,8 @@ class ArretUrgence(BaseState):
 
 
 class DemiTour(BaseState):
-    turn_time = 2
-    turn_w = 1.6
+    turn_time = 1.85
+    turn_w = 1.7
 
     def __init__(self, **kwargs):
         self.start_time = time.time()
@@ -86,10 +99,23 @@ class DemiTour(BaseState):
 
 
 class Intersection(BaseState):
-    center_time = 0.5 #################### A calibrer
+    # center_time = 0.3 #################### A calibrer
+    center_time = 0.5
+    cooldown_time = 2
+
 
     def __init__(self, **kwargs):
         self.start_time = time.time()
+
+    def entry(self, **kwargs):
+        return True
+
+        # Delai min entre 2 intersection
+        global last_inter_time
+        last_inter_time = self.start_time
+        v = kwargs["v"]
+        self.center_time = self.center_time*0.2/v
+
 
     def during(self, **kwargs):
         v = kwargs['v']
@@ -103,13 +129,16 @@ class Intersection(BaseState):
 
 class ChoixDirection(BaseState):
     turn_w = 1.6
-    turn_time = 1
+    turn_time = 0.9
+    deliver_time = 1.5
 
     def __init__(self, **kwargs):
         self.start_time = time.time()
 
     def entry(self, **kwargs):
         instructions = kwargs['instructions']
+        liste_livraison_ordonnee = kwargs['liste_livraison_ordonnee']
+
         v = kwargs["v"]
         try:
             self.direction = next(instructions)
@@ -128,6 +157,7 @@ class ChoixDirection(BaseState):
             self.consigne = (0,self.turn_w)
         elif self.direction == "livraison":
             self.consigne = (0,0)
+            liste_livraison_ordonnee.pop(0)
         else:
             self.consigne = (0,0)
 
@@ -135,11 +165,20 @@ class ChoixDirection(BaseState):
         return self.consigne
 
     def transition_conditions(self, *args, **kwargs):
+        erreur_orientation = kwargs['erreur_orientation']
+        
         if self.direction == "STOP":
             return Stop()
         
-        if time.time() - self.start_time > self.turn_time:
+        if self.direction == "milieu":
             return SuivreLigne()
+
+        if self.direction == "livraison":
+            if time.time() - self.start_time > self.deliver_time:
+                return ChoixDirection()
+        else:
+            if time.time() - self.start_time > self.turn_time:
+                return SuivreLigne()
 
 
 class SortieRoute(BaseState):
@@ -162,8 +201,8 @@ class SortieRoute(BaseState):
 
 
 class DemiTourSR(BaseState):
-    turn_time_SR = 2
-    turn_w_SR = 1.6
+    turn_time_SR = 1.85
+    turn_w_SR = 1.7
 
     def __init__(self, **kwargs):
         self.start_time = time.time()
@@ -198,9 +237,10 @@ class Stop(BaseState):
         self.start_time = time.time()
     
     def during(self, **kwargs):
-        consigne = (0,self.turn_w_SR)
+        consigne = (0,0)
         return consigne
 
     def transition_conditions(self, *args, **kwargs):
         if time.time() - self.start_time > self.stop_time:
             exit(0)
+            
