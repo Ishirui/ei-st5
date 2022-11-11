@@ -9,7 +9,7 @@ v = 0.2 # Vitesse de consigne, en m.s^-1 - doit être compris entre ~0.15 et 0.4
 thresh_obs = 20 # Distance limite de detection d'obstacle en cm
 
 mode = "8" # "8" ou "quad" pour 8 ou quadrillage
-quadrillage = (4, [0,0], [[3,3], [2,2], [0,3]], [0,1])
+quadrillage = (4, [0,0], [[3,3], [2,2], [0,3]], [0,1], [])
 
 erreur_orientation = 0
 detect_obs = 0
