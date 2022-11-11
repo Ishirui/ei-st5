@@ -16,21 +16,36 @@ def main():
 
     left = -1
     right = -1
+    middle = middle
 
-    try_left = where(image[middle_y][:middle_x] ==
-                     max(image[middle_y][:middle_x]))[0][0]
-    try_right = where(image[middle_y][middle_x:] ==
-                      max(image[middle_y][middle_x:]))[0][0]
-    if image[middle_y][left] > 200:
-        left = try_left
-    if image[middle_y][middle_x+right] > 200:
-        right = try_right
-    if left != -1 and right != -1:
-        middle = (left + right)/2
-    if abs(middle_x-middle) > 25:
-        transmit(0.15, (middle_x - middle)/camera.resolution[0] * rot)
+    index = -1
+
+    try_index = where(image[middle_y][:])[0][0]
+
+    if image[middle_y][try_index] > 200:
+        index = try_index
+
+    if index > 0:
+        w = (middle - index) * rot
+        transmit(v, w)
     else:
-        transmit(0.15, 0)
+        transmit(v, 0)
+
+    # try_left = where(image[middle_y][:middle_x] ==
+    #                  max(image[middle_y][:middle_x]))[0][0]
+    # try_right = where(image[middle_y][middle_x:] ==
+    #                   max(image[middle_y][middle_x:]))[0][0]
+    # if image[middle_y][left] > 200:
+    #     left = try_left
+    # if image[middle_y][middle_x+right] > 200:
+    #     right = try_right
+    # if left != -1 and right != -1:
+    #     middle = (left + right)/2
+    # if abs(middle_x-middle) > 25:
+    #     transmit(0.15, (middle_x - middle)/camera.resolution[0] * rot)
+    # else:
+    #     transmit(0.15, 0)
+    rawCapture.truncate(0)
 
 
 if __name__ == '__main__':
@@ -57,17 +72,17 @@ if __name__ == '__main__':
             is_connected = True
             print('connecté')
 
-    middle_x = 640//8
-    middle_y = 480//8
+    middle_x = 160//2
+    middle_y = 128//2
 
     camera = PiCamera()
-    camera.resolution = (640//4, 480//4)
+    camera.resolution = (160, 128)
     camera.framerate = 30
     rawCapture = PiRGBArray(camera, size=camera.resolution)
     frame_source = camera.capture_continuous(
         rawCapture, format="bgr", use_video_port=True)
 
     rot = 0.2
-
+    v = 0.2
     while True:
         main()
