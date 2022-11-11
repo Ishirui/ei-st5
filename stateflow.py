@@ -96,7 +96,7 @@ def main():
     
             curr_state = new_state
 
-            if curr_state.entry(v = v, instructions = instructions, liste_livraison_ordonnee = liste_livraison_ordonnee)
+            if curr_state.entry(v = v, instructions = instructions, liste_livraison_ordonnee = liste_livraison_ordonnee):
                 avancement = avancement + 1 # entry renvoit True uniquement lorsque le nouvel etat est une intersection
 
             print(curr_state)
