@@ -7,16 +7,16 @@ def quadrillage(n, aretes_cassees):
         for j in range(n):
             #on met le graphe dans le bon sens pour que les virages fonctionnent
             if i > 0:
-                if [[j, i], [j, i-1]] not in aretes_cassees:
+                if ((j, i), (j, i-1)) not in aretes_cassees:
                     g[n*i + j].append([n*(i-1) + j, 1])
             if j < n-1:
-                if [[j, i], [j+1, i]] not in aretes_cassees:
+                if ((j, i), (j+1, i)) not in aretes_cassees:
                     g[n*i + j].append([n*i +j + 1, 1])            
             if i < n-1:
-                if [[j, i], [j, i+1]] not in aretes_cassees:
+                if ((j, i), (j, i+1)) not in aretes_cassees:
                     g[n*i + j].append([n*(i+1) +j, 1])
             if j > 0:
-                if [[j, i], [j-1, j]] not in aretes_cassees:
+                if ((j, i), (j-1, j)) not in aretes_cassees:
                     g[n*i + j].append([n*i + j -1, 1])
 
     return g
@@ -157,25 +157,27 @@ def add_stops(movements):
         res.append("stop")
     return res
 
-def generate_movements(n, start_pos, start_card, delivery_coords):
-    g = quadrillage(n, delivery_coords)
+def generate_movements(n, start_pos, start_card, delivery_coords, aretes_cassees):
+    aretes_cassees = aretes_cassees + [(y,x) for (x,y) in aretes_cassees]
+    g = quadrillage(n, aretes_cassees)
     d_c = [convert_coords_to_node(n, start_pos)] + [convert_coords_to_node(n, coords) for coords in delivery_coords]
     it_sorties = get_paths_between_nodes(g, d_c)
+
+    node_coords_to_follow = add_stops([[convert_node_to_coords(node) for node in delivery] for delivery in it_sorties])
+
+    ordered_deliveries = sorted(delivery_coords, key=lambda x: node_coords_to_follow.index(x))
 
     cardinals = get_cardinals(n, it_sorties)
     movements = get_movements(cardinals, start_card)
     movs = add_stops(movements)
 
-    return movs
+    return movs, node_coords_to_follow, ordered_deliveries
 
 
 if __name__ == "__main__":
     n = 4
-    g = quadrillage(n, [[[0,0],[1,0]]])
-    delivery_coords = [[0,1],[1,1]]
-    start = [0,0]
-    d_c = [start[1]*n + start[0]] + [i[1]*n + i[0] for i in delivery_coords]
-    it_sorties = get_paths_between_nodes(g, d_c)
-    movs = add_stops(get_movements(get_cardinals(n, it_sorties), "n"))
+    aretes_cassees = [((0,0), (0,1))]
+    delivery_coords = [(0,1)]
+    movs = generate_movements(n ,(0,0), "n", delivery_coords, aretes_cassees)
 
     print(movs)
