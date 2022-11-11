@@ -6,8 +6,8 @@ from comm_ard.obstacle import distance_capteur
 import time
 
 ## GLOBAL VARIABLES
-v = 0.2 # Vitesse de consigne, en m.s^-1 - doit être compris entre ~0.15 et 0.45
-thresh_obs = 35 # Distance limite de detection d'obstacle en cm
+v = 0.3 # Vitesse de consigne, en m.s^-1 - doit être compris entre ~0.15 et 0.45
+thresh_obs = 50 # Distance limite de detection d'obstacle en cm
 detect_obs_thresh = 5 #Nb de hits qu'il faut avant de lancer un arrêt d'urgence
 
 
@@ -77,6 +77,9 @@ def main():
             print("Erreur de perception:"+str(e))
             erreur_orientation, detect_inter, detect_out = 0,0,0
 
+        if mode == "8": #TODO: Virer ça quand on sera sur l'environnement de test réel
+            detect_inter = 0
+
 
         new_state = curr_state.transition(detect_obs = detect_obs, detect_out = detect_out, detect_inter = detect_inter, erreur_orientation = erreur_orientation)
         if new_state != curr_state:
@@ -103,7 +106,6 @@ def main():
         if consigne is None:
             consigne = (0,0)
 
-        print(consigne)
         transmit(*consigne)
 
 def failsafe(start):
@@ -117,7 +119,8 @@ def failsafe(start):
 if __name__ == "__main__":
     try:
         main()
-    except KeyboardInterrupt:
+    finally:
+        print("Exiting...")
         consigne = (0,0)
         start = time.time()
         failsafe(start)
