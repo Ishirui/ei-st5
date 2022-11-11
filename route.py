@@ -36,7 +36,7 @@ def main():
 
     if index_lb >= 0:
         transmit(0, 0)
-        w = 2*(middle_x - index_lb)/camera.resolution[0] * rot
+        w = -2*(middle_x - index_lb)/camera.resolution[0] * rot
         transmit(v, w)
     else:
         transmit(v, 0)
