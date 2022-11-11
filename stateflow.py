@@ -57,6 +57,7 @@ def main():
     global avancement
     global liste_livraison_ordonnee
     global positions
+    global arretes_cassees
 
     while True:
 
