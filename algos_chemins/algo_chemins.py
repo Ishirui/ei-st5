@@ -107,7 +107,6 @@ def tsp(chain, w, ind, v, simple_g):
         for i in range(v):
             # # if i not in chain and simple_g[ind][i][0] > 0:
             if i not in chain and ind != i:
-            if i not in chain and ind != i:
                 w_temp = w + simple_g[ind][i][0]
                 if w_temp == np.inf:
                     w_comp = np.inf
