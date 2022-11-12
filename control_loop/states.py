@@ -43,6 +43,7 @@ class SuivreLigne(BaseState):
         detect_obs = kwargs['detect_obs']
         detect_inter = kwargs['detect_inter']
         detect_out = kwargs['detect_out']
+        nb_inter_roundabout = kwargs['nb_inter_roundabout']
         
         if detect_obs == 1:
             return ArretUrgence()
@@ -50,6 +51,8 @@ class SuivreLigne(BaseState):
             return Intersection()
         elif detect_out == 1:
             return SortieRoute()
+        if nb_inter_roundabout>0:
+            return ChoixDirection()
 
 
 class ArretUrgence(BaseState):
@@ -136,48 +139,67 @@ class ChoixDirection(BaseState):
         self.start_time = time.time()
 
     def entry(self, **kwargs):
-        instructions = kwargs['instructions']
-        liste_livraison_ordonnee = kwargs['liste_livraison_ordonnee']
+        mode=kwargs["mode"]
+        nb_inter_roundabout=kwargs["nb_inter_roundabout"]
+        missing=kwargs["missing"]
+        if mode=="8" or mode == "quad": #fonctionnement classique
+            instructions = kwargs['instructions']
+            liste_livraison_ordonnee = kwargs['liste_livraison_ordonnee']
 
-        v = kwargs["v"]
-        try:
-            self.direction = next(instructions)
-        except StopIteration:
-            print("Fin du chemin !")
-            self.direction = "STOP"
+            v = kwargs["v"]
+            try:
+                self.direction = next(instructions)
+            except StopIteration:
+                print("Fin du chemin !")
+                self.direction = "STOP"
 
-        if self.direction == 'gauche':
-            self.consigne = (0,self.turn_w) 
-        elif self.direction == 'droite':
-            self.consigne = (0,-self.turn_w) ################## Potentiellement, changer de signes
-        elif self.direction == "milieu":
-            self.consigne = (v, 0)
-        elif self.direction == "demi-tour":
-            self.turn_time = 2*self.turn_time
-            self.consigne = (0,self.turn_w)
-        elif self.direction == "livraison":
-            self.consigne = (0,0)
-            liste_livraison_ordonnee.pop(0)
-        else:
-            self.consigne = (0,0)
+            if self.direction == 'gauche':
+                self.consigne = (0,self.turn_w) 
+            elif self.direction == 'droite':
+                self.consigne = (0,-self.turn_w) 
+            elif self.direction == "milieu":
+                self.consigne = (v, 0)
+            elif self.direction == "demi-tour":
+                self.turn_time = 2*self.turn_time
+                self.consigne = (0,self.turn_w)
+            elif self.direction == "livraison":
+                self.consigne = (0,0)
+                liste_livraison_ordonnee.pop(0)
+            else:
+                self.consigne = (0,0)
+        else: #fonctionnement rond point
+            if nb_inter_roundabout==1 or nb_inter_roundabout==4:
+                #aller tout droit
+                self.consigne = (v,v)
+            elif nb_inter_roundabout==2 or nb_inter_roundabout==3:
+                #on tourne à droite ou à gauche selon le sens dans lequel on est rentré dans le rond-point
+                if missing=="Left":
+                    self.consigne = (0,self.turn_w)
+                if missing=="Right":
+                    self.consigne = (0,-self.turn_w)
 
     def during(self, **kwargs):
         return self.consigne
 
     def transition_conditions(self, *args, **kwargs):
+        mode=kwargs["mode"]
+        missing=kwargs["missing"]
         erreur_orientation = kwargs['erreur_orientation']
-        
-        if self.direction == "STOP":
-            return Stop()
-        
-        if self.direction == "milieu":
-            return SuivreLigne()
+        if mode == "8" or mode == "quad": #en mode classique
+            if self.direction == "STOP":
+                return Stop()
+            
+            if self.direction == "milieu":
+                return SuivreLigne()
 
-        if self.direction == "livraison":
-            if time.time() - self.start_time > self.deliver_time:
-                return ChoixDirection()
-        else:
-            if time.time() - self.start_time > self.turn_time:
+            if self.direction == "livraison":
+                if time.time() - self.start_time > self.deliver_time:
+                    return ChoixDirection()
+            else:
+                if time.time() - self.start_time > self.turn_time:
+                    return SuivreLigne()
+        else: #en mode rond-point
+            if missing==None:
                 return SuivreLigne()
 
 
