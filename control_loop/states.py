@@ -88,7 +88,7 @@ class ArretUrgence(BaseState):
 
 
 class DemiTour(BaseState):
-    turn_time = 4
+    turn_time = 2
     turn_w = 1.7
 
     def __init__(self, **kwargs):
@@ -105,7 +105,7 @@ class DemiTour(BaseState):
 
 class Intersection(BaseState):
     # center_time = 0.3 #################### A calibrer
-    center_time = 1.85
+    center_time = 0.4
     cooldown_time = 2
 
 
@@ -129,13 +129,17 @@ class Intersection(BaseState):
         return consigne
 
     def transition_conditions(self, *args, **kwargs):
-        if time.time() - self.start_time > self.center_time:
-            return ChoixDirection()
+        detect_inter = kwargs['detect_inter']
+        if not detect_inter:
+            if time.time() - self.start_time > self.center_time:
+                return ChoixDirection()
+        else:
+            self.start_time = time.time()
         
 
 class ChoixDirection(BaseState):
     turn_w = 1.6
-    turn_time = 2.2
+    turn_time = 1.2
     deliver_time = 1.5
 
     def __init__(self, **kwargs):
@@ -144,6 +148,8 @@ class ChoixDirection(BaseState):
     def entry(self, **kwargs):
         instructions = kwargs['instructions']
         liste_livraison_ordonnee = kwargs['liste_livraison_ordonnee']
+
+        self.frein_count = 2
 
         v = kwargs["v"]
         try:
@@ -157,17 +163,25 @@ class ChoixDirection(BaseState):
         elif self.direction == 'd':
             self.consigne = (0,-self.turn_w) ################## Potentiellement, changer de signes
         elif self.direction == 'f':
+            self.frein_count = 0
             self.consigne = (v, 0)
         elif self.direction == "b":
             self.turn_time = 2*self.turn_time
             self.consigne = (0,self.turn_w)
         elif self.direction == "stop":
             self.consigne = (0,0)
-            liste_livraison_ordonnee.pop(0)
+            if len(liste_livraison_ordonnee) > 0:
+                liste_livraison_ordonnee.pop(0)
         else:
             self.consigne = (0,0)
 
     def during(self, **kwargs):
+        v = kwargs["v"]
+        
+        if self.frein_count > 0:
+            self.frein_count -= 1
+            return (-v,0)
+
         return self.consigne
 
     def exit(self, **kwargs):
@@ -175,7 +189,6 @@ class ChoixDirection(BaseState):
         return virage[curr_card][self.direction]
 
     def transition_conditions(self, *args, **kwargs):
-        erreur_orientation = kwargs['erreur_orientation']
         
         if self.direction == "FIN":
             return Stop()
@@ -204,14 +217,16 @@ class SortieRoute(BaseState):
     def transition_conditions(self, *args, **kwargs):
         detect_out = kwargs['detect_out']
 
+
         if detect_out == 0:
             return SuivreLigne()
         if time.time() - self.start_time > self.try_rejoin_time:
+            return ChercheRoute()
             return DemiTourSR()
 
 
 class DemiTourSR(BaseState):
-    turn_time_SR = 4
+    turn_time_SR = 1.5
     turn_w_SR = 1.7
 
     def __init__(self, **kwargs):
@@ -231,7 +246,7 @@ class ChercheRoute(BaseState):
     def during(self, **kwargs):
         v = kwargs['v']
 
-        consigne = (v,0)
+        consigne = (-v/2,0)
         return consigne
 
     def transition_conditions(self, *args, **kwargs):

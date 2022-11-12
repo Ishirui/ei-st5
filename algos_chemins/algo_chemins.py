@@ -61,6 +61,8 @@ def simple_graph(g, delivery_nodes):
 
     start_node = delivery_nodes[0]
     end_node = delivery_nodes[-1] #Only really corresponds to the end node in the case of end_node != start_node
+    start_node = delivery_nodes[0]
+    end_node = delivery_nodes[-1] #Only really corresponds to the end node in the case of end_node != start_node
 
     res = []
     for i in range(v):
@@ -103,7 +105,8 @@ def tsp(chain, w, ind, v, simple_g):
         m = np.inf
         best_chain = []
         for i in range(v):
-            # if i not in chain and simple_g[ind][i][0] > 0:
+            # # if i not in chain and simple_g[ind][i][0] > 0:
+            if i not in chain and ind != i:
             if i not in chain and ind != i:
                 w_temp = w + simple_g[ind][i][0]
                 if w_temp == np.inf:
@@ -139,6 +142,7 @@ def convert_coords_to_node(n, coords):
 
 def get_cardinals(n, node_paths):
     res = []
+    
     
     for delivery in node_paths:
         new_deliv = []
