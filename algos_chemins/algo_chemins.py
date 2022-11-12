@@ -56,15 +56,45 @@ def dijkstra(g, a, b):
 
     return node_dist[b], res
 
-def simple_graph(g, delivery_coords):
-    v = len(delivery_coords)
-    res = []
-    for i in range(v):
-        l = [[0, []] for _ in range(v)]
-        for j in range(v):
-            if j != i:
-                l[j] = dijkstra(g, delivery_coords[i], delivery_coords[j])
-        res.append(l)
+def simple_graph(g, delivery_nodes, start_node, end_node):
+    if start_node == end_node:
+        #Normal TSP
+        v = len(delivery_nodes)
+        res = []
+        for i in range(v):
+            l = [ (0, []) for _ in range(v)]
+            for j in range(v):
+                if j != i:
+                    l[j] = dijkstra(g, delivery_nodes[i], delivery_nodes[j])
+            res.append(l)
+
+
+    else:
+        # Point virtuel pour obtenir une chaîne Hamiltonienne, dans le cas ou start =/= end
+        delivery_nodes = [start_node] + delivery_nodes + [end_node]
+
+        delivery_nodes = list(set(delivery_nodes)) #Remove duplicates
+
+        v = len(delivery_nodes)
+        res = []
+        for i in range(v):
+            l = [(0, []) for _ in range(v)]
+            for j in range(v):
+                if j != i:
+                    l[j] = dijkstra(g, delivery_nodes[i], delivery_nodes[j])
+                l.append((np.inf, []))
+            res.append(l)
+
+
+        res[0].append((0,[start_node,-1]))
+        res[-1].append((0,[end_node,-1]))
+        for row in res[1:-1]:
+            row.append((np.inf,[]))
+
+        virtual_point_adjacencies = [(np.inf,[]) for _ in res[1:-1]]
+        virtual_point_adjacencies = [(0,[-1,start_node])] + virtual_point_adjacencies + [(0, [-1,end_node])]
+        res.append(virtual_point_adjacencies)
+
     return res
 
 def tsp(chain, w, ind, v, simple_g):
@@ -86,9 +116,13 @@ def tsp(chain, w, ind, v, simple_g):
                     m = w_comp
         return (m, best_chain)
 
-def get_paths_between_nodes(g, delivery_coords):
-    v = len(delivery_coords)
-    simple_g = simple_graph(g, delivery_coords)
+def get_paths_between_nodes(g, delivery_nodes, start_node, end_node):
+    v = len(delivery_nodes)
+
+    if start_node != end_node:
+        v += 3
+
+    simple_g = simple_graph(g, delivery_nodes, start_node, end_node)
 
     #print(simple_g[:][:][0])
                 
@@ -117,7 +151,6 @@ def get_cardinals(n, node_paths):
 
             cardinal_dir = None
 
-            print(old_x, new_x, old_y, new_y)
 
             if new_x-old_x == 1:
                 cardinal_dir = "e"
@@ -161,13 +194,22 @@ def add_stops(movements):
         res.append("stop")
     return res
 
-def generate_movements(n, start_pos, start_card, delivery_coords, aretes_cassees):
+def generate_movements(n, start_pos, end_point, start_card, delivery_coords, aretes_cassees):
     aretes_cassees = aretes_cassees + [(y,x) for (x,y) in aretes_cassees]
     g = quadrillage(n, aretes_cassees)
-    d_c = [convert_coords_to_node(n, coords) for coords in delivery_coords] + [convert_coords_to_node(n, start_pos)]
-    it_sorties = get_paths_between_nodes(g, d_c)
+    d_nodes = [convert_coords_to_node(n, coords) for coords in delivery_coords] + [convert_coords_to_node(n, start_pos)]
+
+    start_node = convert_coords_to_node(n, start_pos)
+    end_node = convert_coords_to_node(n, end_point)
+
+    it_sorties = get_paths_between_nodes(g, d_nodes, start_node, end_node)
+
+    if start_node != end_node: #In case of Hamiltonian chain, (see simple_graph function above), we need to remove the transiting through the virtual point
+        it_sorties = it_sorties[:-2]
+
 
     node_coords_to_follow = add_stops([[convert_node_to_coords(n, node) for node in delivery] for delivery in it_sorties])
+
 
     ordered_deliveries = sorted(delivery_coords, key=lambda x: node_coords_to_follow.index(x))
 
@@ -182,6 +224,6 @@ if __name__ == "__main__":
     n = 4
     aretes_cassees = [((0,0), (0,1))]
     delivery_coords = [(0,1)]
-    movs = generate_movements(n ,(0,0), "n", delivery_coords, aretes_cassees)
+    movs,_,_ = generate_movements(n, (0,0), (0,3), "n", delivery_coords, aretes_cassees)
 
     print(movs)
