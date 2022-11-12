@@ -83,6 +83,7 @@ def simple_graph(g, delivery_nodes):
                         l[j] = (np.inf, [])
                 else:
                     l[j] = dijkstra(g, delivery_nodes[i], delivery_nodes[j])
+
         res.append(l)
 
     # if -1 in delivery_nodes:
@@ -121,7 +122,7 @@ def get_paths_between_nodes(g, delivery_nodes):
     #print(simple_g[:][:][0])
                 
     reponse_tsp = tsp([], 0, 0, v, simple_g)
-    
+
     it_points = [simple_g[reponse_tsp[1][v-i-1]][reponse_tsp[1][v-i]][1] for i in range(v)]
 
     return it_points
@@ -220,8 +221,8 @@ def generate_movements(n, start_pos, end_pos, start_card, delivery_coords, arete
 
 if __name__ == "__main__":
     n = 5
-    aretes_cassees = [((0,0), (0,1))]
-    delivery_coords = [(0,1),(1,0)]
-    movs = generate_movements(n, (0,0), (0,2), "n", delivery_coords, aretes_cassees)
+    aretes_cassees = [((0,0), (1,0))]
+    delivery_coords = []
+    movs = generate_movements(n, (1,0), (0,0), "w", delivery_coords, aretes_cassees)
 
     print(movs)

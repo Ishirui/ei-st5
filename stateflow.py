@@ -7,7 +7,7 @@ import time
 import traceback
 
 ## GLOBAL VARIABLES
-v = 0.5 # Vitesse de consigne, en m.s^-1 - doit être compris entre ~0.15 et 0.45
+v = 0.35 # Vitesse de consigne, en m.s^-1 - doit être compris entre ~0.15 et 0.45
 thresh_obs = 30 # Distance limite de detection d'obstacle en cm
 detect_obs_thresh = 5 #Nb de hits qu'il faut avant de lancer un arrêt d'urgence
 
@@ -98,7 +98,7 @@ def main():
                 print('Recalcul en cours...')
                 point_depart, aretes_cassees = exit_res
                 curr_card = virage[curr_card]['b']
-                instruction_liste, positions, liste_livraison_ordonnee = generate_movements(N, point_depart, curr_card, liste_livraison_ordonnee, aretes_cassees)
+                instruction_liste, positions, liste_livraison_ordonnee = generate_movements(N, point_depart, point_fin, curr_card, liste_livraison_ordonnee, aretes_cassees)
                 instructions = (x for x in instruction_liste)
                 print('Nouvelles instructions : ', instruction_liste)
     
