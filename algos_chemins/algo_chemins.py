@@ -56,45 +56,39 @@ def dijkstra(g, a, b):
 
     return node_dist[b], res
 
-def simple_graph(g, delivery_nodes, start_node, end_node):
-    if start_node == end_node:
-        #Normal TSP
-        v = len(delivery_nodes)
-        res = []
-        for i in range(v):
-            l = [ (0, []) for _ in range(v)]
-            for j in range(v):
-                if j != i:
+def simple_graph(g, delivery_nodes):
+    v = len(delivery_nodes)
+
+    start_node = delivery_nodes[0]
+    end_node = delivery_nodes[-1] #Only really corresponds to the end node in the case of end_node != start_node
+
+    res = []
+    for i in range(v):
+        l = [(0, []) for _ in range(v)]
+        for j in range(v):
+            if j != i:
+                if delivery_nodes[i] == -1:
+                    if delivery_nodes[j] == start_node:
+                        l[j] = (0, [start_node, -1])
+                    elif delivery_nodes[j] == end_node:
+                        l[j] = (0, [end_node, -1])
+                    else:
+                        l[j] = (np.inf, [])
+                elif delivery_nodes[j] == -1:
+                    if delivery_nodes[i] == start_node:
+                        l[j] = (0, [-1, start_node])
+                    elif delivery_nodes[i] == end_node:
+                        l[j] = (0, [-1, end_node])
+                    else:
+                        l[j] = (np.inf, [])
+                else:
                     l[j] = dijkstra(g, delivery_nodes[i], delivery_nodes[j])
-            res.append(l)
+        res.append(l)
 
-
-    else:
-        # Point virtuel pour obtenir une chaîne Hamiltonienne, dans le cas ou start =/= end
-        delivery_nodes = [start_node] + delivery_nodes + [end_node]
-
-        delivery_nodes = list(set(delivery_nodes)) #Remove duplicates
-
-        v = len(delivery_nodes)
-        res = []
-        for i in range(v):
-            l = [(0, []) for _ in range(v)]
-            for j in range(v):
-                if j != i:
-                    l[j] = dijkstra(g, delivery_nodes[i], delivery_nodes[j])
-                l.append((np.inf, []))
-            res.append(l)
-
-
-        res[0].append((0,[start_node,-1]))
-        res[-1].append((0,[end_node,-1]))
-        for row in res[1:-1]:
-            row.append((np.inf,[]))
-
-        virtual_point_adjacencies = [(np.inf,[]) for _ in res[1:-1]]
-        virtual_point_adjacencies = [(0,[-1,start_node])] + virtual_point_adjacencies + [(0, [-1,end_node])]
-        res.append(virtual_point_adjacencies)
-
+    # if -1 in delivery_nodes:
+    #     res[0][-1] = (0, [start_node, -1, end_node])
+    #     res[-1][0] = (0, [end_node, -1, start_node])
+    
     return res
 
 def tsp(chain, w, ind, v, simple_g):
@@ -108,25 +102,26 @@ def tsp(chain, w, ind, v, simple_g):
         m = np.inf
         best_chain = []
         for i in range(v):
-            if i not in chain and simple_g[ind][i][0] > 0:
+            # if i not in chain and simple_g[ind][i][0] > 0:
+            if i not in chain and ind != i:
                 w_temp = w + simple_g[ind][i][0]
-                w_comp, new_chain = tsp(chain[:], w_temp, i, v, simple_g)
+                if w_temp == np.inf:
+                    w_comp = np.inf
+                else:
+                    w_comp, new_chain = tsp(chain[:], w_temp, i, v, simple_g)
                 if w_comp < m:
                     best_chain = new_chain
                     m = w_comp
         return (m, best_chain)
 
-def get_paths_between_nodes(g, delivery_nodes, start_node, end_node):
+def get_paths_between_nodes(g, delivery_nodes):
     v = len(delivery_nodes)
-
-    if start_node != end_node:
-        v += 3
-
-    simple_g = simple_graph(g, delivery_nodes, start_node, end_node)
+    simple_g = simple_graph(g, delivery_nodes)
 
     #print(simple_g[:][:][0])
                 
-    reponse_tsp =  tsp([], 0, 0, v, simple_g)
+    reponse_tsp = tsp([], 0, 0, v, simple_g)
+    
     it_points = [simple_g[reponse_tsp[1][v-i-1]][reponse_tsp[1][v-i]][1] for i in range(v)]
 
     return it_points
@@ -143,6 +138,7 @@ def convert_coords_to_node(n, coords):
 
 def get_cardinals(n, node_paths):
     res = []
+    
     for delivery in node_paths:
         new_deliv = []
         for prev_node, node in zip(delivery, delivery[1:]):
@@ -194,22 +190,24 @@ def add_stops(movements):
         res.append("stop")
     return res
 
-def generate_movements(n, start_pos, end_point, start_card, delivery_coords, aretes_cassees):
+def generate_movements(n, start_pos, end_pos, start_card, delivery_coords, aretes_cassees):
     aretes_cassees = aretes_cassees + [(y,x) for (x,y) in aretes_cassees]
     g = quadrillage(n, aretes_cassees)
-    d_nodes = [convert_coords_to_node(n, coords) for coords in delivery_coords] + [convert_coords_to_node(n, start_pos)]
-
     start_node = convert_coords_to_node(n, start_pos)
-    end_node = convert_coords_to_node(n, end_point)
-
-    it_sorties = get_paths_between_nodes(g, d_nodes, start_node, end_node)
-
-    if start_node != end_node: #In case of Hamiltonian chain, (see simple_graph function above), we need to remove the transiting through the virtual point
-        it_sorties = it_sorties[:-2]
-
+    end_node = convert_coords_to_node(n, end_pos)
+    delivery_nodes = [start_node] + [convert_coords_to_node(n, coords) for coords in delivery_coords]
+    if start_pos != end_pos:
+        delivery_nodes.append(-1)
+        delivery_nodes.append(end_node)
+    
+    it_sorties = get_paths_between_nodes(g, delivery_nodes)
+    
+    if start_pos != end_pos:
+        it_sorties = it_sorties[2:]
+        if it_sorties[0][0] == end_node:
+            it_sorties = [list(reversed(path)) for path in list(reversed(it_sorties))]
 
     node_coords_to_follow = add_stops([[convert_node_to_coords(n, node) for node in delivery] for delivery in it_sorties])
-
 
     ordered_deliveries = sorted(delivery_coords, key=lambda x: node_coords_to_follow.index(x))
 
@@ -221,9 +219,9 @@ def generate_movements(n, start_pos, end_point, start_card, delivery_coords, are
 
 
 if __name__ == "__main__":
-    n = 4
+    n = 5
     aretes_cassees = [((0,0), (0,1))]
-    delivery_coords = [(0,1)]
-    movs,_,_ = generate_movements(n, (0,0), (0,3), "n", delivery_coords, aretes_cassees)
+    delivery_coords = [(0,1),(1,0)]
+    movs = generate_movements(n, (0,0), (0,2), "n", delivery_coords, aretes_cassees)
 
     print(movs)

@@ -14,9 +14,10 @@ detect_obs_thresh = 5 #Nb de hits qu'il faut avant de lancer un arrêt d'urgence
 mode = "quad" # "8" ou "quad" pour 8 ou quadrillage
 N = 4 # Nombre de noeuds sur le cote du quadrillage
 #point_depart_abs = (0,0)
-point_depart = (3,3)
+point_depart = (0,0)
+point_fin = point_depart
 livraisons = [(2,2), (0,3)]
-curr_card = 's'
+curr_card = 'n'
 aretes_cassees = []
 #[manoeuvre,position,liste_livraison_ordonnee]
 #generate_movements(n,point_depart,points_livraison,orientation,aretes_cassees)
@@ -41,7 +42,7 @@ if mode == "8":
             yield "milieu"
     instructions = generator()
 else:
-    instruction_liste, positions,liste_livraison_ordonnee = generate_movements(N, point_depart, curr_card, livraisons, aretes_cassees)
+    instruction_liste, positions,liste_livraison_ordonnee = generate_movements(N, point_depart, point_fin, curr_card, livraisons, aretes_cassees)
     instructions = (x for x in instruction_liste)
     print(instruction_liste)
 

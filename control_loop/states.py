@@ -105,7 +105,7 @@ class DemiTour(BaseState):
 
 class Intersection(BaseState):
     # center_time = 0.3 #################### A calibrer
-    center_time = 1.85
+    center_time = 0.6
     cooldown_time = 2
 
 
