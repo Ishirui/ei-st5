@@ -163,7 +163,7 @@ def generate_movements(n, start_pos, start_card, delivery_coords, aretes_cassees
     d_c = [convert_coords_to_node(n, start_pos)] + [convert_coords_to_node(n, coords) for coords in delivery_coords]
     it_sorties = get_paths_between_nodes(g, d_c)
 
-    node_coords_to_follow = add_stops([[convert_node_to_coords(node) for node in delivery] for delivery in it_sorties])
+    node_coords_to_follow = add_stops([[convert_node_to_coords(n,node) for node in delivery] for delivery in it_sorties])
 
     ordered_deliveries = sorted(delivery_coords, key=lambda x: node_coords_to_follow.index(x))
 
