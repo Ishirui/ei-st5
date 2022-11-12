@@ -18,8 +18,8 @@ frame_source = camera.capture_continuous(
     rawCapture, format="bgr", use_video_port=True)
 
 
-def perception(feedback=False, mode=12):
-
+def perception(feedback=False, mode="8"):
+    # NB: mode 8 et quadrillage sont les mêmes
     # Input Image
     image = next(frame_source).array
     #image = cv2.flip(image, -1)
@@ -52,7 +52,7 @@ def perception(feedback=False, mode=12):
 
     # Dans le cas des parcours 1 et 2 : on ne traite qu'un blob
     # Find the different contours
-    if mode == 12:
+    if mode == "8" or mode == "quad":
         _, contours, _ = cv2.findContours(
             dilated_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         img_contours = np.zeros(dilated_mask.shape)
@@ -67,7 +67,7 @@ def perception(feedback=False, mode=12):
         else:
             detectOut = 1
 
-    elif mode == 3:
+    elif mode == "roundabout":
         _, contours, _ = cv2.findContours(
             dilated_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         img_contours = np.zeros(dilated_mask.shape)
@@ -176,8 +176,8 @@ def perception(feedback=False, mode=12):
     rawCapture.truncate(0)
 
     # avec les modes 1 et 2:
-    if mode == 12:
-        return (erreur_orientation, detect_inter, detectOut)
+    if mode == "8" or mode == "quad":
+        return (erreur_orientation, detect_inter, detectOut, None)
     # sinon en mode 3, il faut ajouter quelle ligne est manquante
     else:
         return (erreur_orientation, detect_inter, detectOut, missing)
