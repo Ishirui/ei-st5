@@ -10,6 +10,8 @@ bot = Robot(\
     delivery_to_do_coords = None
     )
 
+bot.do_intersections = False
+
 def main():
     
     old_state = bot.curr_state
