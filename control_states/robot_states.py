@@ -31,11 +31,21 @@ class State:
         if bot.stop:
             return Stop()
         
-        new_state = self.transition_conditions(self, bot, )
+        new_state = self.transition_conditions(bot)
         return new_state if new_state is not None else self
 
     def transition_conditions(self, bot):
         pass
+
+class Init(State):
+    #Wait for everything to be properly initialized
+    def during(self, bot):
+        return (0,0)
+
+    def transition_conditions(self, bot):
+        if not bot.detect_out and bot.obstacle_buffer == 0:
+            return Acceleration()
+
 
 class Acceleration(State):
     accel_time = 0.1
@@ -46,6 +56,7 @@ class Acceleration(State):
     def transition_conditions(self, bot):
         if time() - self.start_time > self.accel_time:
             return SuivreLigne()
+
 class SuivreLigne(State):
     outer_gain = 3 ######################### Remplacer par le bon gain
     inner_gain = 2.3
@@ -53,7 +64,7 @@ class SuivreLigne(State):
 
     def activation_function(self, bot, x):
         sinh_correction = sinh(1)
-        max_w = (1/K)*(v_max-bot.v)#The maximum w such that v+K*w doesn't exceed v_max ,as defined in arduino_comm.transmit
+        max_w = (1/K)*(v_max-bot.target_v)#The maximum w such that v+K*w doesn't exceed v_max ,as defined in arduino_comm.transmit
     
         x = x/bot.camera_resolution[0]
 
@@ -66,7 +77,7 @@ class SuivreLigne(State):
         return (max_w/sinh_correction)*sinh(x)
 
     def during(self, bot):
-        w = self.outer_gain*self.activation_function(self.inner_gain*bot.turn_error) + self.bias
+        w = self.outer_gain*self.activation_function(bot, self.inner_gain*bot.turn_error) + self.bias
         return (bot.target_v, w)
 
     def transition_conditions(self, bot):
@@ -77,7 +88,9 @@ class SuivreLigne(State):
             return Obstacle()
 
         if bot.do_intersections and bot.detect_inter:
-            return ApprocheIntersection()   
+            return ApprocheIntersection()  
+
+ 
 class ApprocheIntersection(State):
     coast_time = 0.4
     
@@ -101,6 +114,7 @@ class ApprocheIntersection(State):
                 return SuivreLigne()
             else:
                 return Freinage(self.direction)  
+
 class Freinage(State):
     brake_time = 0.1
     

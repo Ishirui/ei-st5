@@ -1,6 +1,6 @@
 from .robot_states import *
-from ..image_processing.perception import perception, resolution_target
-from ..arduino_comm.obstacle import distance_capteur
+from image_processing.perception import perception, resolution_target
+from arduino_comm.obstacle import distance_capteur
 
 class Robot:
     # An object storing all parameters 
@@ -55,6 +55,8 @@ class Robot:
     def do_perception(self):
         self.turn_error, self.detect_inter, self.detect_out = perception()
         dist_obst = distance_capteur()
-        if dist_obst <= self.obst_detect_distance:
+        if 0 < dist_obst <= self.obst_detect_distance:
             self.obstacle_buffer += 1
+        else:
+            self.obstacle_buffer = 0
 

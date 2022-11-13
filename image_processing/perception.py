@@ -1,7 +1,6 @@
 from __future__ import division
 import cv2
 import numpy as np
-from ..control_states.robot import Robot
 
 from picamera import PiCamera
 from picamera.array import PiRGBArray
@@ -26,9 +25,9 @@ def perception(feedback = False):
     if feedback: cv2.imshow("Image non traitée", image)
 
     # Output initializing
-    detectOut = 0
-    detect_inter = 0
-    erreur_orientation = 0
+    detectOut = False
+    detect_inter = False
+    erreur_orientation = 0.
 
     # Convert to HSV color space
     blur = cv2.blur(image,(10,10))
@@ -59,7 +58,7 @@ def perception(feedback = False):
         cx = int(M['m10']/M['m00']) # Abscisse du centre du blob
         erreur_orientation = image.shape[0]/2 - cx
     else:
-        detectOut = 1
+        detectOut = True
 
 
     # # On cherche des "routes" sur 3 des 4 bords de la camera
@@ -132,13 +131,14 @@ def perception(feedback = False):
     ligne = horizontal.max(axis=0)
     brightness = np.sum(ligne)/(len(ligne)*255)
 
-    if brightness > brightness_thresh:
-        detect_inter = 1
-    else:
-        detect_inter = 0
+    detect_inter = brightness > brightness_thresh
 
     # Clear the stream in preparation for the next frame
     rawCapture.truncate(0)
+
+    if feedback: 
+        cv2.imshow("Image traitée", horizontal)
+        cv2.waitKey(1)
 
     return (erreur_orientation,detect_inter,detectOut)
 
