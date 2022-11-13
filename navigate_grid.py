@@ -7,17 +7,15 @@ from sys import exit
 start_time = time()
 
 bot = Robot(\
-    curr_state = HandleIntersection(None),\
+    curr_state = InitNode(),
     do_intersections = True,
     do_road_exit = False,
     do_obstacles = True,
     deliveries_to_do_coords = [(2,2)],
     curr_pos = (0,0),
     curr_heading = "n",
-    home_pos = (1,3)
+    home_pos = (0,0)
     )
-
-bot.curr_state.direction = next(bot.instructions)
 
 def main():
     
@@ -32,7 +30,6 @@ def main():
         bot.curr_state = state
         print("Transition à t = {} : {} -> {}".format(state.start_time-start_time, old_state, state))
 
-    print(bot.curr_pos)
     consigne = state.during(bot)
     transmit(consigne)
 

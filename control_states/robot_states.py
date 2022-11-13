@@ -65,7 +65,7 @@ class Acceleration(State):
 
 class SuivreLigne(State):
     outer_gain = 2 ######################### Remplacer par le bon gain
-    inner_gain = 2.5
+    inner_gain = 2.2
     bias = 0.4
 
     def activation_function(self, bot, x):
@@ -98,7 +98,7 @@ class SuivreLigne(State):
 
  
 class ApprocheIntersection(State):
-    coast_time = 0.3
+    coast_time = 0.2
     cooldown_time = 2
     
     def entry(self, bot):
@@ -142,9 +142,18 @@ class Freinage(State):
         if time() - self.start_time > self.brake_time:
             return HandleIntersection(self.direction)
 
+class InitNode(State):
+    def during(self, bot):
+        return (0,0)
+    
+    def transition_conditions(self, bot):
+        if not bot.detect_out and bot.obstacle_buffer == 0:
+            return HandleIntersection(next(bot.instructions))
+
+
 class HandleIntersection(State): #Aussi appelé "virage"
     turn_90_time = 0.8
-    turn_180_time = 1.7
+    turn_180_time = 1.5
     deliver_time = 1
     turn_params = {"f":(0,0), "g":(1, turn_90_time), "d":(-1, turn_90_time), "b":(-1, turn_180_time), "stop":(0,deliver_time), "fin":(0,0)}
 
@@ -153,6 +162,9 @@ class HandleIntersection(State): #Aussi appelé "virage"
         self.direction = direction
     
     def entry(self, bot):
+        print(self.direction)
+        self.start_time = time()
+        
         if self.direction == "fin":
             print("Finished !")
             bot.stop = True

@@ -54,7 +54,15 @@ class Robot:
                 setattr(self, el, kwargs[el])
 
         if self.deliveries_to_do_coords != []:
-            new_instructions, new_ordered_deliveries = generate_movements(self.n, self.curr_pos, self.home_pos, self.curr_heading, self.deliveries_to_do_coords, self.broken_edges)
+
+
+            if self.curr_pos[0] < 0 or self.curr_pos[1] < 0:
+                start_pos = (self.curr_pos[0] + translation[self.curr_heading][0], self.curr_pos[1] + translation[self.curr_heading][1])
+            else:
+                start_pos = self.curr_pos
+
+
+            new_instructions, new_ordered_deliveries = generate_movements(self.n, start_pos, self.home_pos, self.curr_heading, self.deliveries_to_do_coords, self.broken_edges)
             print(new_instructions)
             self.instructions = (x for x in new_instructions)
             self.deliveries_to_do_coords = new_ordered_deliveries
