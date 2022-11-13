@@ -23,7 +23,7 @@ def main():
         state.entry(bot)
 
         bot.curr_state = state
-        print(f"Transition à t = {state.start_time} : {old_state} -> {state}")
+        print("Transition à t = {} : {} -> {}".format(state.start_time, old_state, state))
 
     consigne = state.during(bot)
 

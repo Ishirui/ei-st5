@@ -1,9 +1,7 @@
-from dataclasses import dataclass
 from .robot_states import *
 from ..image_processing.perception import perception, resolution_target
 from ..arduino_comm.obstacle import distance_capteur
 
-@dataclass
 class Robot:
     # An object storing all parameters 
 
@@ -24,13 +22,13 @@ class Robot:
     road_exit_behavior = "u-turn" # "u-turn" or "stop"
 
     #Position and orientation states
-    curr_state: State
-    curr_pos: tuple
-    curr_heading: str
+    curr_state = None
+    curr_pos = None
+    curr_heading = None
 
     #Navigational state
     instructions = None
-    deliveries_to_do_coords: list
+    deliveries_to_do_coords = []
     stop = False
 
     broken_edges = []
@@ -44,6 +42,12 @@ class Robot:
 
     #Obstacle handling
     obstacle_buffer = 0
+
+    def __init__(self, **kwargs):
+        for el in dir(self):
+            if el in kwargs:
+                setattr(self, el, kwargs[el])
+
 
     def do_perception(self):
         self.turn_error, self.detect_inter, self.detect_out = perception()
