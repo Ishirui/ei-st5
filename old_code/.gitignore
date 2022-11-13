@@ -1,0 +1,11 @@
+.hg*
+*.wav
+
+*.aux
+*.bbl
+*.blg
+*.dvi
+*.idx
+*.log
+
+*/__pycache__/
