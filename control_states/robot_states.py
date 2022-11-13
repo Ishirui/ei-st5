@@ -3,6 +3,12 @@ from math import sinh
 from ..arduino_comm.transmit import v_max, K
 import sys
 
+virage = {'n': {'g':'w', 'd':'e', 'f':'n', 'b':'s', 'stop':'n', 'fin':'n'},\
+          's': {'g':'e', 'd':'w', 'f':'s', 'b':'n', 'stop':'s', 'fin':'s'},\
+          'e': {'g':'n', 'd':'s', 'f':'e', 'b':'w', 'stop':'e', 'fin':'e'},\
+          'w': {'g':'s', 'd':'n', 'f':'w', 'b':'e', 'stop':'w', 'fin':'w'}}
+
+translation = {'n':(0,1), 's':(0,-1), 'w':(-1,0), 'e':(0,1)}
 class State:
     def __init__(self):
         self.start_time = time()
@@ -84,6 +90,10 @@ class ApprocheIntersection(State):
         
         return (bot.target_v, 0)
 
+    def exit(self, bot):
+        # Update bot's position on the grid
+        bot.curr_pos = (bot.curr_pos[0] + translation[bot.curr_heading][0], bot.curr_pos[1] + translation[bot.curr_heading][1])
+
     def transition_conditions(self, bot):
         if self.coast and time() - self.coast_start > self.coast_time:
             if self.direction == "f":
@@ -102,27 +112,49 @@ class Freinage(State):
     
     def transition_conditions(self, bot):
         if time() - self.start_time > self.brake_time:
-            return Virage(self.direction)
-class Virage(State):
+            return HandleIntersection(self.direction)
+class HandleIntersection(State):
     turn_90_time = 1
-    turn_params = {"f":(0,0), "g":(1, turn_90_time), "d":(-1, turn_90_time), "b":(-1, 2*turn_90_time)}
+    deliver_time = 1
+    turn_params = {"f":(0,0), "g":(1, turn_90_time), "d":(-1, turn_90_time), "b":(-1, 2*turn_90_time), "stop":(0,deliver_time), "fin":(0,0)}
 
     def __init__(self, direction):
         super().__init__()
         self.direction = direction
+    
+    def entry(self, bot):
+        if self.direction == "fin":
+            print("Finished !")
+            bot.stop = True
 
     def during(self, bot):
         return (0,bot.target_w*self.turn_params[self.direction][0])
+
+    def exit(self, bot):
+        #Update bot's heading
+        bot.curr_heading = virage[bot.curr_heading][self.direction]
+        pass
     
     def transition_conditions(self, bot):
         if time() - self.start_time > self.turn_params[self.direction][1]:
+            if self.direction == "stop":
+                self.direction = next(bot.instructions)
+
+            if self.direction == "fin":
+                return Stop()
+            
             return Acceleration()
+
+    
 class Obstacle(State):
     def entry(self, bot):
         bot.obstacle_buffer = 0
-        #Recalculer
+
+    
+
 class RoadExit(State):
     pass
+
 class Stop(State):
     brake_time = 0.1
     time_before_exit = 0.5
