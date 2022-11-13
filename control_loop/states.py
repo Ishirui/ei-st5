@@ -2,7 +2,7 @@ import time
 from sys import exit
 from math import sinh
 
-virage = {'n': {'g':'w', 'd':'e', 'f':'n', 'b':'s', 'stop':'n'},\
+virage = {'n': {'g':'w', 'd':'e', 'f':'n', 'b':'s', 'stop':'n',},\
           's': {'g':'e', 'd':'w', 'f':'s', 'b':'n', 'stop':'s'},\
           'e': {'g':'n', 'd':'s', 'f':'e', 'b':'w', 'stop':'e'},\
           'w': {'g':'s', 'd':'n', 'f':'w', 'b':'e', 'stop':'w'}}
@@ -185,8 +185,9 @@ class ChoixDirection(BaseState):
         return self.consigne
 
     def exit(self, **kwargs):
-        curr_card = kwargs['curr_card']
-        return virage[curr_card][self.direction]
+        if self.direction !='FIN':
+            curr_card = kwargs['curr_card']
+            return virage[curr_card][self.direction]
 
     def transition_conditions(self, *args, **kwargs):
         

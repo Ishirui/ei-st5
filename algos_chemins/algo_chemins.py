@@ -58,7 +58,7 @@ def dijkstra(g, a, b):
 
 def simple_graph(g, delivery_nodes):
     v = len(delivery_nodes)
-
+    print("delivery_nodes =",delivery_nodes)
     start_node = delivery_nodes[0]
     end_node = delivery_nodes[-1] #Only really corresponds to the end node in the case of end_node != start_node
     start_node = delivery_nodes[0]
@@ -189,6 +189,7 @@ def add_stops(movements):
     for l in movements:
         res = res + l
         res.append("stop")
+    res[-1] = 'FIN'
     return res
 
 def generate_movements(n, start_pos, end_pos, start_card, delivery_coords, aretes_cassees):
@@ -196,7 +197,9 @@ def generate_movements(n, start_pos, end_pos, start_card, delivery_coords, arete
     g = quadrillage(n, aretes_cassees)
     start_node = convert_coords_to_node(n, start_pos)
     end_node = convert_coords_to_node(n, end_pos)
-    delivery_nodes = [start_node] + [convert_coords_to_node(n, coords) for coords in delivery_coords]
+    delivery_nodes = [start_node]
+    if len(delivery_coords)>0:
+        delivery_nodes= delivery_nodes+[convert_coords_to_node(n, coords) for coords in delivery_coords]
     if start_pos != end_pos:
         delivery_nodes.append(-1)
         delivery_nodes.append(end_node)
