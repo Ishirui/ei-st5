@@ -51,6 +51,11 @@ class Robot:
             if el in kwargs:
                 setattr(self, el, kwargs[el])
 
+        if self.deliveries_to_do_coords is not []:
+            new_instructions, new_ordered_deliveries = generate_movements(self.n, self.curr_pos, self.home_pos, self.curr_heading)
+            self.instructions = (x for x in new_instructions)
+            self.deliveries_to_do_coords = new_ordered_deliveries
+
 
     def do_perception(self):
         self.turn_error, self.detect_inter, self.detect_out = perception()
