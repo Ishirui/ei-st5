@@ -196,7 +196,7 @@ def add_stops(movements):
     for l in movements:
         res = res + l
         res.append("stop")
-    res[-1] = 'FIN'
+    res[-1] = 'fin'
     return res
 
 def generate_movements(n, start_pos, end_pos, start_card, delivery_coords, aretes_cassees):

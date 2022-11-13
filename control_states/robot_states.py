@@ -1,7 +1,7 @@
 from time import time
 from math import sinh
 from arduino_comm.transmit import v_max, K
-from grid_navigation.navigate_grid import generate_movements
+from grid_navigation.grid_navigation import generate_movements
 import sys
 
 virage = {'n': {'g':'w', 'd':'e', 'f':'n', 'b':'s', 'stop':'n', 'fin':'n'},\
@@ -48,12 +48,15 @@ class Init(State):
 
 
 class Acceleration(State):
-    accel_time = 0.1
+    accel_time = 0.3
 
     def during(self, bot):
         return (100, 0) #Saturate the motors
     
     def transition_conditions(self, bot):
+        if bot.detect_inter:
+            return ApprocheIntersection()
+        
         if time() - self.start_time > self.accel_time:
             return SuivreLigne()
 
@@ -92,10 +95,12 @@ class SuivreLigne(State):
 
  
 class ApprocheIntersection(State):
-    coast_time = 0.4
+    coast_time = 0.3
     
     def entry(self, bot):
         self.direction = next(bot.instructions)
+        print(self.direction)
+        self.coast = False
 
     def during(self,bot):
         if bot.detect_inter == 0 and not self.coast:
@@ -128,8 +133,9 @@ class Freinage(State):
     def transition_conditions(self, bot):
         if time() - self.start_time > self.brake_time:
             return HandleIntersection(self.direction)
+
 class HandleIntersection(State): #Aussi appelé "virage"
-    turn_90_time = 1
+    turn_90_time = 0.8
     deliver_time = 1
     turn_params = {"f":(0,0), "g":(1, turn_90_time), "d":(-1, turn_90_time), "b":(-1, 2*turn_90_time), "stop":(0,deliver_time), "fin":(0,0)}
 
@@ -154,8 +160,6 @@ class HandleIntersection(State): #Aussi appelé "virage"
             bot.delivery_history.append(bot.curr_pos)
         elif self.direction in ["f","g","d","b"]:
             bot.turn_history.append(self.direction)
-
-        pass
     
     def transition_conditions(self, bot):
         if time() - self.start_time > self.turn_params[self.direction][1]:
@@ -186,9 +190,9 @@ class Obstacle(State):
 
         next_node = (bot.curr_pos[0] + translation[bot.curr_heading][0], bot.curr_pos[1] + translation[bot.curr_heading][1])
 
-        bot.aretes_cassees.append((bot.curr_pos, next_node))
+        bot.broken_edges.append((bot.curr_pos, next_node))
 
-        new_instructions, new_ordered_deliveries = generate_movements(bot.n, bot.curr_pos, bot.home_pos, new_heading)
+        new_instructions, new_ordered_deliveries = generate_movements(bot.n, bot.curr_pos, bot.home_pos, bot.curr_heading, bot.deliveries_to_do_coords, bot.broken_edges)
         bot.instructions = (x for x in new_instructions)
         bot.deliveries_to_do_coords = new_ordered_deliveries
 
@@ -218,11 +222,10 @@ class Stop(State):
     time_before_exit = 0.5
 
     def during(self, bot):
-        if self.time_before_exit > time() - self.start_time > self.brake_time:
+        if time() - self.start_time > self.time_before_exit:
+            print("Done !")
+            sys.exit(0)
+        elif self.time_before_exit > time() - self.start_time > self.brake_time:
             return (0,0)
         else:
             return (-bot.target_v,0)
-        
-    def exit(self, bot):
-        print("Done !")
-        sys.exit(0)
