@@ -1,20 +1,19 @@
 from dataclasses import dataclass
-from typing import Generator
 from .robot_states import *
+from ..image_processing.perception import perception, resolution_target
 
 @dataclass
 class Robot:
     # An object storing all parameters 
 
-
     # Dynamic parameters
     target_v = 0.3
-    target_w = 1.5
+    target_w = 0.45
 
     obst_detect_distance = 30
     obst_buff_size = 5
 
-    camera_resolution = (160, 128)
+    camera_resolution = resolution_target
 
     #Feature switches
     do_intersections = True
@@ -29,9 +28,11 @@ class Robot:
     curr_heading: str
 
     #Navigational state
-    instructions: Generator[str]
+    instructions = None
     deliveries_to_do_coords: list
+    stop = False
 
+    broken_edges = []
     turn_history = []
     delivery_history = []
     
@@ -42,3 +43,6 @@ class Robot:
 
     #Obstacle handling
     obstacle_buffer = 0
+
+    def do_perception(self):
+        self.turn_error, self.detect_inter, self.detect_out = perception()

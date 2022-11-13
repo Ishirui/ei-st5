@@ -1,18 +1,19 @@
 from __future__ import division
 import cv2
 import numpy as np
-import time
+from ..control_states.robot import Robot
 
 from picamera import PiCamera
 from picamera.array import PiRGBArray
 
+resolution_target = (160, 128)
+
 camera = PiCamera(sensor_mode = 2)
-camera.resolution = (640//4, 480//4)
+camera.resolution = resolution_target
 camera.framerate = 32
 rawCapture = PiRGBArray(camera, size=camera.resolution)
 
 brightness_thresh = 0.1
-
 
 frame_source = camera.capture_continuous(rawCapture, format="bgr", use_video_port=True)
 

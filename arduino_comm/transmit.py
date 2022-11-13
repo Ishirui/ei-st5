@@ -45,7 +45,9 @@ def connect_to_arduino():
 connect_to_arduino()
 
 
-def transmit(v, w):
+def transmit(order):
+    v,w = order
+    
     # on va dire au moteurs qu'on les modifie
     write_order(serial_file, Order.MOTOR)
 
