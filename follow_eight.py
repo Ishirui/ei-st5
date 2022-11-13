@@ -1,3 +1,4 @@
+from numpy import False_
 from control_states.robot import Robot
 from control_states.robot_states import *
 from arduino_comm.transmit import transmit
@@ -9,7 +10,7 @@ start_time = time()
 bot = Robot(\
     curr_state = Init(),\
     do_intersections = False,
-    do_road_exit = True,
+    do_road_exit = False,
     do_obstacles = True
     )
 
@@ -28,7 +29,6 @@ def main():
         print("Transition à t = {} : {} -> {}".format(state.start_time-start_time, old_state, state))
 
     consigne = state.during(bot)
-    print(bot.do_road_exit, bot.detect_out)
 
     transmit(consigne)
 
@@ -44,4 +44,3 @@ if __name__ == "__main__":
         bot.stop = True
         transmit((0,0))
         exit(0)
-        

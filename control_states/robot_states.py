@@ -9,7 +9,7 @@ virage = {'n': {'g':'w', 'd':'e', 'f':'n', 'b':'s', 'stop':'n', 'fin':'n'},\
           'e': {'g':'n', 'd':'s', 'f':'e', 'b':'w', 'stop':'e', 'fin':'e'},\
           'w': {'g':'s', 'd':'n', 'f':'w', 'b':'e', 'stop':'w', 'fin':'w'}}
 
-translation = {'n':(0,1), 's':(0,-1), 'w':(-1,0), 'e':(0,1)}
+translation = {'n':(0,1), 's':(0,-1), 'w':(-1,0), 'e':(1,0)}
 class State:
     def __init__(self):
         self.start_time = time()
@@ -48,26 +48,29 @@ class Init(State):
 
 
 class Acceleration(State):
-    accel_time = 0.3
+    accel_time = 0.1
+    buffer_time = 0.05
 
     def during(self, bot):
+        if time() - self.start_time < self.buffer_time:
+            return (0,0) 
         return (100, 0) #Saturate the motors
     
     def transition_conditions(self, bot):
-        if bot.detect_inter and time() - bot.last_intersection_time > ApprocheIntersection.cooldown_time:
+        if bot.do_intersections and bot.detect_inter and time() - bot.last_intersection_time > ApprocheIntersection.cooldown_time:
             return ApprocheIntersection()
         
         if time() - self.start_time > self.accel_time:
             return SuivreLigne()
 
 class SuivreLigne(State):
-    outer_gain = 3 ######################### Remplacer par le bon gain
-    inner_gain = 2.3
+    outer_gain = 2 ######################### Remplacer par le bon gain
+    inner_gain = 2.5
     bias = 0.4
 
     def activation_function(self, bot, x):
         sinh_correction = sinh(1)
-        max_w = (1/K)*(v_max-bot.target_v)#The maximum w such that v+K*w doesn't exceed v_max ,as defined in arduino_comm.transmit
+        max_w = (1/K)*(v_max-bot.target_v) #The maximum w such that v+K*w doesn't exceed v_max ,as defined in arduino_comm.transmit
     
         x = x/bot.camera_resolution[0]
 
@@ -100,12 +103,17 @@ class ApprocheIntersection(State):
     
     def entry(self, bot):
         self.direction = next(bot.instructions)
+        #print(self.direction)
         self.coast = False
 
     def during(self,bot):
-        if bot.detect_inter == 0 and not self.coast:
+        if not bot.detect_inter and not self.coast:
             self.coast = True
             self.coast_start = time()
+
+        if bot.detect_inter:
+            self.coast = False
+            self.coast_start = -1
         
         return (bot.target_v, 0)
 
@@ -136,8 +144,9 @@ class Freinage(State):
 
 class HandleIntersection(State): #Aussi appelé "virage"
     turn_90_time = 0.8
+    turn_180_time = 1.7
     deliver_time = 1
-    turn_params = {"f":(0,0), "g":(1, turn_90_time), "d":(-1, turn_90_time), "b":(-1, 2*turn_90_time), "stop":(0,deliver_time), "fin":(0,0)}
+    turn_params = {"f":(0,0), "g":(1, turn_90_time), "d":(-1, turn_90_time), "b":(-1, turn_180_time), "stop":(0,deliver_time), "fin":(0,0)}
 
     def __init__(self, direction):
         super().__init__()
@@ -158,13 +167,14 @@ class HandleIntersection(State): #Aussi appelé "virage"
         #Update histories
         if self.direction == "stop":
             bot.delivery_history.append(bot.curr_pos)
+            bot.deliveries_to_do_coords.pop(0)
         elif self.direction in ["f","g","d","b"]:
             bot.turn_history.append(self.direction)
     
     def transition_conditions(self, bot):
         if time() - self.start_time > self.turn_params[self.direction][1]:
             if self.direction == "stop":
-                self.direction = next(bot.instructions)
+                return HandleIntersection(next(bot.instructions))
 
             if self.direction == "fin":
                 return Stop()
@@ -184,15 +194,22 @@ class Obstacle(State):
             return (0,0)
 
     def exit(self, bot):
+        if bot.instructions is None: #8-follow mode
+            return
+        
         #We have to flip the start_cardinality, we could have handled that in generate_movements but eh
-        new_heading = virage[bot.curr_heading]["g"]
-        new_heading = virage[new_heading]["g"]
+        new_heading = virage[bot.curr_heading]["b"]
 
         next_node = (bot.curr_pos[0] + translation[bot.curr_heading][0], bot.curr_pos[1] + translation[bot.curr_heading][1])
 
         bot.broken_edges.append((bot.curr_pos, next_node))
 
-        new_instructions, new_ordered_deliveries = generate_movements(bot.n, bot.curr_pos, bot.home_pos, bot.curr_heading, bot.deliveries_to_do_coords, bot.broken_edges)
+        new_instructions, new_ordered_deliveries = generate_movements(bot.n, bot.curr_pos, bot.home_pos, new_heading, bot.deliveries_to_do_coords, bot.broken_edges)
+        print(new_instructions)
+
+        bot.curr_pos = next_node
+        bot.curr_heading = new_heading
+
         bot.instructions = (x for x in new_instructions)
         bot.deliveries_to_do_coords = new_ordered_deliveries
 
@@ -201,7 +218,7 @@ class Obstacle(State):
             return DemiTour()
 
 class DemiTour(State):
-    turn_time = 2*HandleIntersection.turn_90_time
+    turn_time = HandleIntersection.turn_180_time
 
     def during(self, bot):
         return (0, bot.target_w)
@@ -220,6 +237,10 @@ class RoadExit(State):
 class Stop(State):
     brake_time = 0.1
     time_before_exit = 0.5
+
+    def entry(self, bot):
+        print("Entering stop state")
+        bot.stop = False #To prevent re-creating over and over the stop state, endlessly resetting the timer
 
     def during(self, bot):
         if time() - self.start_time > self.time_before_exit:

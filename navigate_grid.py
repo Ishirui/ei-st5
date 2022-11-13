@@ -12,7 +12,7 @@ bot = Robot(\
     do_road_exit = False,
     do_obstacles = True,
     deliveries_to_do_coords = [(2,2)],
-    curr_pos = (0,0),
+    curr_pos = (0,-1),
     curr_heading = "n",
     home_pos = (0,0)
     )
@@ -28,8 +28,9 @@ def main():
         state.entry(bot)
 
         bot.curr_state = state
-        #print("Transition à t = {} : {} -> {}".format(state.start_time-start_time, old_state, state))
+        print("Transition à t = {} : {} -> {}".format(state.start_time-start_time, old_state, state))
 
+    print(bot.curr_pos)
     consigne = state.during(bot)
     transmit(consigne)
 

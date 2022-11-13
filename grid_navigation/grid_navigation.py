@@ -149,6 +149,8 @@ def get_cardinals(n, node_paths):
             old_x, old_y = convert_node_to_coords(n, prev_node)
             new_x,new_y = convert_node_to_coords(n, node)
 
+            print(old_x, new_x, old_y, new_y)
+
             if new_x-old_x == 1:
                 cardinal_dir = "e"
             elif new_x-old_x == -1:
@@ -212,7 +214,9 @@ def generate_movements(n, start_pos, end_pos, start_card, delivery_coords, arete
         delivery_nodes.append(end_node)
     
     it_sorties = get_paths_between_nodes(g, delivery_nodes)
-    
+
+    print(it_sorties)
+
     if start_pos != end_pos:
 
         if -1 in it_sorties[0] and -1 in it_sorties[1]:
@@ -230,6 +234,8 @@ def generate_movements(n, start_pos, end_pos, start_card, delivery_coords, arete
     #pos_list = [start_pos] + [convert_node_to_coords(n, node) for node in nodes_to_follow]
 
     ordered_deliveries = sorted(delivery_coords, key=lambda x: node_coords_to_follow.index(x))
+
+    print(delivery_coords)
 
     cardinals = get_cardinals(n, it_sorties)
     movements = get_movements(cardinals, start_card)
