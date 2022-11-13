@@ -16,7 +16,7 @@ N = 4 # Nombre de noeuds sur le cote du quadrillage
 #point_depart_abs = (0,0)
 point_depart = (0,0)
 point_fin = point_depart
-livraisons = [(2,2),(0,3)]
+livraisons = [(1,2),(2,3),(3,0)]
 curr_card = 'n'
 aretes_cassees = []
 #[manoeuvre,position,liste_livraison_ordonnee]
@@ -99,8 +99,12 @@ def main():
                 point_depart, aretes_cassees = exit_res
                 curr_card = virage[curr_card]['b']
                 print('liste_livraison_ordonnee = ', liste_livraison_ordonnee)
-                
+                print('curd_card = ', curr_card)
+                print('point_depart:', point_depart)
+                print('point_fin : ', point_fin)
+                print('aretes_cassees : ',aretes_cassees)
                 instruction_liste, positions, liste_livraison_ordonnee = generate_movements(N, point_depart, point_fin, curr_card, liste_livraison_ordonnee, aretes_cassees)
+                avancement=0
                 instructions = (x for x in instruction_liste)
                 print('Nouvelles instructions : ', instruction_liste)
     
@@ -110,6 +114,7 @@ def main():
                 avancement = avancement + 1 # entry renvoit True uniquement lorsque le nouvel etat est une intersection
 
             print(curr_state)
+            print(avancement)
 
         consigne = curr_state.during(v = v, erreur_orientation = erreur_orientation)
 

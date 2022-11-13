@@ -79,6 +79,8 @@ class ArretUrgence(BaseState):
         if mode == 'quad':
             point_depart = positions[avancement-1]
             pre_depart = positions[avancement]
+            print(positions)
+            print(avancement)
             aretes_cassees.append((pre_depart,point_depart))
             return (point_depart, aretes_cassees)
 

@@ -219,14 +219,19 @@ def generate_movements(n, start_pos, end_pos, start_card, delivery_coords, arete
             it_sorties = [list(reversed(path)) for path in list(reversed(it_sorties))]
 
     node_coords_to_follow = add_stops([[convert_node_to_coords(n, node) for node in delivery] for delivery in it_sorties])
+    #nodes_to_follow = [path[1:] for path in it_sorties]
+    #pos_list = [start_pos] + [convert_node_to_coords(n, node) for node in nodes_to_follow]
 
     ordered_deliveries = sorted(delivery_coords, key=lambda x: node_coords_to_follow.index(x))
 
     cardinals = get_cardinals(n, it_sorties)
     movements = get_movements(cardinals, start_card)
     movs = add_stops(movements)
-
-    return movs, node_coords_to_follow, ordered_deliveries
+    pos_list=[]
+    for i in range(len(node_coords_to_follow)):
+        if node_coords_to_follow[i]!='stop' and node_coords_to_follow[i-1]!='stop':
+            pos_list.append(node_coords_to_follow[i])
+    return movs, pos_list, ordered_deliveries
 
 
 if __name__ == "__main__":
