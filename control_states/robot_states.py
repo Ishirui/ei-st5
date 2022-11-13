@@ -54,7 +54,7 @@ class Acceleration(State):
         return (100, 0) #Saturate the motors
     
     def transition_conditions(self, bot):
-        if bot.detect_inter:
+        if bot.detect_inter and time() - bot.last_intersection_time > ApprocheIntersection.cooldown_time:
             return ApprocheIntersection()
         
         if time() - self.start_time > self.accel_time:
@@ -90,16 +90,16 @@ class SuivreLigne(State):
         if bot.do_obstacles and bot.obstacle_buffer >= bot.obst_buff_size:
             return Obstacle()
 
-        if bot.do_intersections and bot.detect_inter:
+        if bot.do_intersections and bot.detect_inter and time() - bot.last_intersection_time > ApprocheIntersection.cooldown_time:
             return ApprocheIntersection()  
 
  
 class ApprocheIntersection(State):
     coast_time = 0.3
+    cooldown_time = 2
     
     def entry(self, bot):
         self.direction = next(bot.instructions)
-        print(self.direction)
         self.coast = False
 
     def during(self,bot):

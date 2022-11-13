@@ -34,6 +34,8 @@ class Robot:
     deliveries_to_do_coords = []
     stop = False
 
+    last_intersection_time = -1
+
     broken_edges = []
     turn_history = []
     delivery_history = []
