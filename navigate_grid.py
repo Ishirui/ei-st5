@@ -14,7 +14,7 @@ bot = Robot(\
     deliveries_to_do_coords = [(2,2)],
     curr_pos = (0,0),
     curr_heading = "n",
-    home_pos = (0,0)
+    home_pos = (1,3)
     )
 
 bot.curr_state.direction = next(bot.instructions)
