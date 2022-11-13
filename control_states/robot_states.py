@@ -1,6 +1,7 @@
 from time import time
 from math import sinh
-from ..arduino_comm.transmit import v_max, K
+from arduino_comm.transmit import v_max, K
+from grid_navigation.navigate_grid import generate_movements
 import sys
 
 virage = {'n': {'g':'w', 'd':'e', 'f':'n', 'b':'s', 'stop':'n', 'fin':'n'},\
@@ -113,7 +114,7 @@ class Freinage(State):
     def transition_conditions(self, bot):
         if time() - self.start_time > self.brake_time:
             return HandleIntersection(self.direction)
-class HandleIntersection(State):
+class HandleIntersection(State): #Aussi appelé "virage"
     turn_90_time = 1
     deliver_time = 1
     turn_params = {"f":(0,0), "g":(1, turn_90_time), "d":(-1, turn_90_time), "b":(-1, 2*turn_90_time), "stop":(0,deliver_time), "fin":(0,0)}
@@ -144,13 +145,45 @@ class HandleIntersection(State):
                 return Stop()
             
             return Acceleration()
-
     
 class Obstacle(State):
+    wait_time = 0.1 #Time between braking and start recalculating
+    
     def entry(self, bot):
         bot.obstacle_buffer = 0
-
     
+    def during(self, bot):
+        if time() - self.start_time > Freinage.brake_time:
+            return (-bot.target_v, 0)
+        else:
+            return (0,0)
+
+    def exit(self, bot):
+        #We have to flip the start_cardinality, we could have handled that in generate_movements but eh
+        new_heading = virage[bot.curr_heading]["g"]
+        new_heading = virage[new_heading]["g"]
+
+        next_node = (bot.curr_pos[0] + translation[bot.curr_heading][0], bot.curr_pos[1] + translation[bot.curr_heading][1])
+
+        bot.aretes_cassees.append((bot.curr_pos, next_node))
+
+        new_instructions, new_ordered_deliveries = generate_movements(bot.n, bot.curr_pos, bot.home_pos, new_heading)
+        bot.instructions = (x for x in new_instructions)
+        bot.deliveries_to_do_coords = new_ordered_deliveries
+
+    def transition_conditions(self, bot):
+        if time() - self.start_time > Freinage.brake_time + self.wait_time:
+            return DemiTour()
+
+class DemiTour(State):
+    turn_time = 2*HandleIntersection.turn_90_time
+
+    def during(self, bot):
+        return (0, bot.target_w)
+
+    def transition_conditions(self, bot):
+        if time() - self.start_time > self.turn_time:
+            return SuivreLigne()
 
 class RoadExit(State):
     pass

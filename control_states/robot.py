@@ -14,6 +14,9 @@ class Robot:
 
     camera_resolution = resolution_target
 
+    n = 4
+    home_pos = (0,0)
+
     #Feature switches
     do_intersections = True
     do_obstacles = True
