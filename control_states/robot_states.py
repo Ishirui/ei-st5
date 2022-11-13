@@ -148,6 +148,13 @@ class HandleIntersection(State): #Aussi appelé "virage"
     def exit(self, bot):
         #Update bot's heading
         bot.curr_heading = virage[bot.curr_heading][self.direction]
+        
+        #Update histories
+        if self.direction == "stop":
+            bot.delivery_history.append(bot.curr_pos)
+        elif self.direction in ["f","g","d","b"]:
+            bot.turn_history.append(self.direction)
+
         pass
     
     def transition_conditions(self, bot):
@@ -194,6 +201,10 @@ class DemiTour(State):
 
     def during(self, bot):
         return (0, bot.target_w)
+
+    def exit(self, bot):
+        #Update history
+        bot.turn_history.append("b")
 
     def transition_conditions(self, bot):
         if time() - self.start_time > self.turn_time:
