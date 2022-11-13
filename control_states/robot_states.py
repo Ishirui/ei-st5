@@ -100,20 +100,23 @@ class SuivreLigne(State):
 class ApprocheIntersection(State):
     coast_time = 0.2
     cooldown_time = 2
+    buffer_size = 5
     
     def entry(self, bot):
         self.direction = next(bot.instructions)
         #print(self.direction)
         self.coast = False
+        self.buffer = 0
 
     def during(self,bot):
+        if bot.detect_inter:
+            self.coast = False
+            self.coast_start = -1
+        
         if not bot.detect_inter and not self.coast:
             self.coast = True
             self.coast_start = time()
 
-        if bot.detect_inter:
-            self.coast = False
-            self.coast_start = -1
         
         return (bot.target_v, 0)
 

@@ -31,6 +31,7 @@ def perception(feedback = False):
 
     # Convert to HSV color space
     blur = cv2.blur(image,(10,10))
+
     _, thresh1 = cv2.threshold(blur,168,255,cv2.THRESH_BINARY)
     hsv = cv2.cvtColor(thresh1, cv2.COLOR_RGB2HSV)
 
@@ -47,11 +48,15 @@ def perception(feedback = False):
     kernel_dilate = np.ones((4,4), np.uint8)
     dilated_mask = cv2.dilate(eroded_mask, kernel_dilate, iterations=1)
 
+    
+
     # Find the different contours
     _, contours, _ = cv2.findContours(dilated_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     img_contours = np.zeros(dilated_mask.shape)
     contours = sorted(contours, key=cv2.contourArea, reverse=True)[:1] # Sort by area (keep only the biggest one)
     cv2.drawContours(img_contours, contours, -1, (255,0,0), -1)
+
+    if feedback: cv2.imshow("Semi-traitée", img_contours)
 
     if len(contours) > 0: # Si un blob est detectee
         M = cv2.moments(contours[0])

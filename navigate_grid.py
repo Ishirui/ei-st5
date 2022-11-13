@@ -12,9 +12,10 @@ bot = Robot(\
     do_road_exit = False,
     do_obstacles = True,
     deliveries_to_do_coords = [(2,2)],
-    curr_pos = (0,0),
+    curr_pos = (3,0),
     curr_heading = "n",
-    home_pos = (0,0)
+    home_pos = (3,0),
+    broken_edges = [((2,0),(2,1))]
     )
 
 def main():
