@@ -7,15 +7,17 @@ from sys import exit
 start_time = time()
 
 bot = Robot(\
-    curr_state = Init(),\
+    curr_state = HandleIntersection(None),\
     do_intersections = True,
     do_road_exit = False,
     do_obstacles = True,
     deliveries_to_do_coords = [(2,2)],
-    curr_pos = (0,-1),
+    curr_pos = (0,0),
     curr_heading = "n",
     home_pos = (0,0)
     )
+
+bot.curr_state.direction = next(bot.instructions)
 
 def main():
     

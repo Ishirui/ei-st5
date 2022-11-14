@@ -14,7 +14,7 @@ class Robot:
 
     camera_resolution = resolution_target
 
-    n = 4
+    n = 5
     home_pos = (0,0)
 
     #Feature switches
