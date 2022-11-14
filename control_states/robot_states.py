@@ -215,7 +215,17 @@ class DemiTour(State):
             return SuivreLigne()
 
 class RoadExit(State):
-    pass
+    line_seek_time = 0.8
+    
+    def during(self, bot):
+        if time() - self.start_time > self.line_seek_time:
+            return (-bot.target_v,0)
+        else:
+            return (bot.target_v,0)
+
+    def transition_conditions(self, bot):
+        if not bot.detect_out:
+            return Acceleration()
 
 class Stop(State):
     brake_time = 0.1
